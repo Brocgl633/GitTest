@@ -251,7 +251,7 @@ public class Client_1 {
                                 time = endTime - startTime;
                                 serverResponse = (Response) in.readObject();
                                 System.out.println(
-                                        (String) serverResponse.getResponseData() + " Take" + time + " ms.");
+                                        (String) serverResponse.getResponseData() + " ,Take " + time + " ms.");
                             }
                             break;
                         case 5:
@@ -329,7 +329,7 @@ public class Client_1 {
             long time = endTime - startTime;
 
             if (isDownloaded) {
-                System.out.println("File downloaded successfully. Take " + time + " seconds.");
+                System.out.println("File downloaded successfully. Take " + time + " ms.");
             } else {
                 System.out.println("Unable to download file. Try again later.");
             }
