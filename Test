@@ -22,7 +22,7 @@ public class Test {
 		try {
 			input = new BufferedReader(new InputStreamReader(System.in));
 			System.out.println("****** Client-Server mode file downloading system test program ******");
-			System.out.println("Please input client ip: ");
+			System.out.println("Please input server ip: ");
 			String ip = input.readLine();
 			System.out.println("Please input the absolute path file: ");
 			String absPath = input.readLine();
