@@ -47,10 +47,10 @@ public class FileUtil {
 	}
 
 	/***
-	 * Find the absolute path of fileName in the directory list.
+	 * Find the standard path of file directory in the directory list.
 	 * @param fileName	search file name
 	 * @param dirList	list of all the directory
-	 * @return			the absolute path of the input parameter fileName
+	 * @return			the standard path of the input parameter file's directory
 	 */
 	public static String getFileLocation(String fileName, List<String> dirList) {
 		String fileAbsPath = "";
@@ -74,9 +74,10 @@ public class FileUtil {
 
 	/***
 	 * Download the file from the client(ip).
-	 * @param ip		download file in this ip
-	 * @param port		download file in this ip's port
-	 * @param fileName	name of the file
+	 * @param ip				download file in this ip
+	 * @param port				download file in this ip's port
+	 * @param fileName			name of the file
+	 * @param regDirPathList	registered files' directory
 	 * @return			true: download successfully; false: download unsuccessfully
 	 */
 	public static boolean downloadFile(String ip, int port, String fileName, List<String> regDirPathList) {
