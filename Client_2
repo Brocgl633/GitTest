@@ -153,7 +153,6 @@ public class Client_2 {
                             } else {
                                 System.out.println("There are no more files in path [ " + path + " ].");
                             }
-                            System.out.println();
                             break;
                         case 2:
                             System.out.println("\nAll file are as follows:");
@@ -193,7 +192,7 @@ public class Client_2 {
                                 if (clientIdIpMap != null) {
                                     for (Map.Entry<Integer, String> entry : clientIdIpMap.entrySet()) {
                                         System.out.println("Client id : " + entry.getKey());
-                                        System.out.println("Host Address :" + entry.getValue());
+                                        System.out.println("Client ip :" + entry.getValue());
                                     }
                                 }
 
