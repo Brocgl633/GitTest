@@ -1,0 +1,50 @@
+这是一个基于CS架构的文件下载系统，该系统要求多个Client与同一个Server进行通信，并且实现文件的上传、下载、查看以及操作日志的下载、查看等功能。
+
+设计思想：
+该系统要求实现CS架构，并且要维护文件列表，所以需要三个类来进行实时通信(Client，Server, ClientInfomation)，可以简化成两个端口，Server与ClientInformation通过端口22233进行通信，Client与Server通过端口22233进行通信，ClientInformation与Client通过端口12233进行通信。
+Client引导用户进行针对文件的不同的操作，ClientInformation通过Map表维护<Client ip, register file names>以及<Client ip, register file directory>的映射，Server为Client提供不同功能的服务，如下载文件，删除文件，更新备份文件等。
+  
+1. Request：
+  拥有两个属性String requestType 和 String requestType。
+  该类被用作Client发送请求时，可以设置请求类型和请求的具体数据，以便Server根据不同的请求类型对请求数据进行不同的处理类型。
+
+2. Response：
+  与Request类同理。
+
+3. FileUtil：这是一个文件工具类，其中提供了几个方法：
+  (1) ArrayList<String> getFiles(String path): 这个方法的目的是获取输入路径下的文件名列表。入参是一个路径，可以是文件夹的路径也可以是文件的绝对路径。如果是文件夹，则将该文件夹下的所有文件检索出来，将它们的文件名存储到一个列表里面，返回该列表；如果是文件，直接截取路径获得文件名，存储到一个列表里面，返回该列表。
+  (2) String getFileLocation(String fileName, List<String> dirList): 这个方法的目的是在目录列表中查找哪一个目录下包含输入的文件名。通过遍历目录列表，针对每一个路径下的文件进行比较，知道找到某一个目录下包含输入的文件名，则返回输入文件名所在目录的的标准路径。
+  (3) boolean downloadFile(String ip, int port, String fileName, List<String> regDirPathList): 这个方法的目的是下载文件。通过指定的ip和端口，通过socket连接，遍历维护的注册文件的目录列表来获取文件的绝对路径，通过该路径下载文件到/downloads目录下，下载成功返回true，否则返回false。
+  (4) boolean backupFile(String ip, int port, String fileName): 类似downloadFile()方法，如果Client指定为备份节点，则会调用此方法，将文件下载至/backupfiles目录下。
+  (5) void printFile(String fileName): 打印文件的内容。
+
+4. LogUtil：这是一个日志工具类，其中提供了几个方法：
+  (1) LogUtil(String logType): 这是一个有参构造函数，通过对传入的日志类型，创建特定的日志类对象，后续所有的日志会追加到该目录中。
+  (2) void write(String logContent): 将Client，Server, ClientInfomation的操作日志追加到各自对应的目录里。
+  (3) void print(): 在控制台打印日志内容。
+  (4) void close(): 关闭日志缓冲区的writer stream。
+
+5. IPServer：
+  该类用于校验ip地址的合法性。
+
+6. BackupService：
+  这是一个提供备份功能的服务。其目的在于保证一个正常运行的Client一个与Server意外失去连接的Client上的文件的顺利下载。
+  其中有一个哈希表，主要维护ip到其上已经注册的文件名列表的映射。由于同一个ip能够多次连接server，则要将client id 与 client ip 以及 该client连接server的时间戳拼接在一起，用以key的保证唯一性。
+  其中提供了一个方法：void backup(String ip, String fileName)，调用了FileUtil的backupFile()方法，用来下载文件到备份目录，达到备份的目的。
+
+7. Client：
+  这个类代表客户端，启动它，则创建一个线程，调用run()方法，通过端口22233与Server建立Socket连接，通过端口12233与ClientInformation建立Socket连接。随后在控制台像用户展示选项列表，根据用户的选择处理不同的逻辑，这些功能包括文件的上传/注册、查看、输出以及删除/注销，还有三种不同类型日志的打印。
+
+8. Server：
+  这个类代表服务端，启动它，则创建一个线程，调用run()方法，通过监听端口22233监听来自Client和ClientInformation的信息，具体有Client调用FileUtil中的downloadFile()和backupFile()对Server发出的请求；ClientInformation调用unregister()和backupFiles()对Server发出的请求。
+
+9. ClientInformation：
+  这个类维护了Client连接Server的各种信息，包括Client id、Client ip、Client ip到该Client中已经注册的文件列表的映射等等。启动它，则创建了一个线程，调用run()方法，通过监听端口12233与Client建立Socket连接。具体有Client发出的REGISTER、SEARCH、UNREGISTER、GET_BACKUP_NODES、GET_FILES_LIST、DISCONNECT请求。
+  其中提供了如下功能：
+  List<String> getAllFileInfo()：获取所有与Server建立连接的Client中，已经注册的文件名列表。
+  void interrupt()：中断Client与Server的连接，连接数减一。
+  void logPrint(String message)：追加到Server类型的日志后，并打印在控制台上。
+  ArrayList<String> register(String ip, ArrayList<String> registerFileList)：在Client ip 上注册registerFileList这些文件。返回注册的文件名列表。
+  boolean unregister(String ip)：删除/注销Client ip上的所有文件，成功返回true，失败返回false。
+  HashMap<Integer, String> search(String fileName)：在维护的哈希表中查找目标文件，返回的哈希表是Client id到Client ip的映射。
+  void backupFiles(ConcurrentHashMap<String, ArrayList<String>> curSpellIpFileMap)：备份传入的哈希表中的文件列表，将其下载到备份目录/backupfiles。
