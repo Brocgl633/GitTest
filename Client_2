@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author c30035198
  * @since 2024-02-19 09:27
  */
-public class Client550_2 {
+public class Client_2 {
 
     private static List<String> regDirPathList = Collections.synchronizedList(new ArrayList<>());
 
