@@ -1,0 +1,42 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2024-2024. All rights reserved.
+ */
+
+package iit_550_n;
+
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * TODO
+ *
+ * @author c30035198
+ * @since 2024-02-19 09:26
+ */
+class BackupService extends Thread {
+
+    private static final int SERVER_SOCKET_PORT = 22233;
+
+    private static ConcurrentHashMap<String, ArrayList<String>> spellIpFileMap = new ConcurrentHashMap<>();
+
+    public BackupService(ConcurrentHashMap<String, ArrayList<String>> spellIpFileMap) {
+        this.spellIpFileMap = spellIpFileMap;
+    }
+
+    public void run() {
+        for (Map.Entry<String, ArrayList<String>> entry : spellIpFileMap.entrySet()) {
+            String key = entry.getKey();
+            ArrayList<String> value = entry.getValue();
+            String ip = key.split("#")[1].trim();
+            for (String file : value) {
+                backup(ip, file);
+            }
+        }
+        this.interrupt();
+    }
+
+    private void backup(String ip, String fileName) {
+        FileUtil.backupFile(ip, SERVER_SOCKET_PORT, fileName);
+    }
+}
