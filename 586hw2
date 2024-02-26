@@ -1,0 +1,125 @@
+inheritance:
+Class "Adapter_A"
+Operations
+Sorting() {
+   Heap_Sort. Esort()
+    Merge_SortEsort()
+}
+
+Class "Adapter_B"
+Operations
+Esort() {
+    Quick_Sort.Sort()
+    Bubble_Sort.Sort()
+}
+
+Class "Adapter_C"
+Operations
+Sort() {
+    Heap_Sort.Esort()
+    Merge_Sort.Esort()
+}
+
+
+association:
+Class "Adapter_A"
+S2 *p1
+S2 *p2
+Operations
+Sorting() {
+    p1.Esort()
+    p2.Esort()
+}
+
+Class "Adapter_B"
+S3 *p1
+S3 *p2
+Operations
+Esort() {
+    p1.Sort()
+    p2.Sort()
+}
+
+Class "Adapter_C"
+S2 *p1
+S2 *p2
+Operations
+Sort() {
+    p1.Esort()
+    p2.Esort()
+}
+
+
+
+
+
+CBS:
+Class "ClientProxy-A"
+Broker *b
+
+Operations
+int SetPrice(String a, float b) {
+    r = new Request3()
+    r.op = "int SetPrice(String, float)"
+    r.x1 = a
+    r.x2 = b
+    b.forwardService(r)
+    return r.result
+}
+
+float GetPrice(String a) {
+    r = new Request2()
+    r.op = "float GetPrice(String)"
+    r.x1 = a
+    b.forwardService(r)
+    return r.result
+}
+
+void BuyStock(int a, String b) {
+    r = new Request1()
+    r.op = "void BuyStock(int, String)"
+    r.x2 = a
+    r.x1 = b
+    b.forwardService(r)
+}
+
+void SellStock(String a, int b) {
+    r = new Request1()
+    r.op = "void SellStock(String, int)"
+    r.x1 = a
+    r.x2 = b
+    b.forwardService(r)
+}
+
+
+Class "Broker"
+list of server proxies
+ServerProxy * sp
+
+Operations
+void forwardService(request) {
+    sp = findService(request.op)
+    if (sp != null) {
+        sp.callService(r)
+    } else {
+        server is not found!!!
+    }
+}
+
+
+
+Class "ServerProxy-1"
+Server * s
+
+Operations
+callService(Request r) {
+    if (r.op == "int SetPrice(String, float)") {
+        r.result = s.SetPrice(r.x1, r.x2)
+    } else if (r.op == "float GetPrice(String)") {
+        r.result = s.float(r.x1)
+    } else if (r.op == "void BuyStock(String, int)") {
+        s.BuyStock(r.x1, r.x2)
+    } else if (r.op == "void SellStock(String, int)") {
+        s.SellStock(r.x1, r.x2)
+    }
+}
