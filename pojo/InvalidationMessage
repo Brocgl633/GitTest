@@ -1,0 +1,42 @@
+package com.iit.cao.pa3.pojo;
+
+import lombok.Data;
+
+import java.io.Serializable;
+import java.util.List;
+
+@Data
+public class InvalidationMessage implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private static final byte DEFAULT_TTL = 15;
+
+    private String clientName;
+
+    private String fileName;
+
+    private Integer sequenceNum;
+
+    private Integer version;
+
+    private String messageId;
+
+    private List<Node> linkNodeList;
+
+    private Byte ttl;
+
+    public InvalidationMessage() {
+    }
+
+    public InvalidationMessage(String clientName, String fileName, Integer sequenceNum, Integer version,
+            String messageId, List<Node> linkNodeList) {
+        this.clientName = clientName;
+        this.fileName = fileName;
+        this.sequenceNum = sequenceNum;
+        this.version = version;
+        this.messageId = messageId;
+        this.linkNodeList = linkNodeList;
+        this.ttl = DEFAULT_TTL;
+    }
+}
