@@ -1,0 +1,39 @@
+package com.iit.cao.pa3.pojo;
+
+import lombok.Data;
+
+import java.io.Serializable;
+import java.util.List;
+
+@Data
+public class QueryMessage implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private static final byte DEFAULT_TTL = 15;
+
+    private String nodeName;
+
+    private String fileName;
+
+    private Integer sequenceNum;
+
+    private String messageId;
+
+    private List<Node> linkNodeList;
+
+    private Byte ttl;
+
+    public QueryMessage() {
+    }
+
+    public QueryMessage(String nodeName, String fileName, Integer sequenceNum, String messageId, List<Node> linkNodeList) {
+        this.nodeName = nodeName;
+        this.fileName = fileName;
+        this.sequenceNum = sequenceNum;
+        this.messageId = messageId;
+        this.linkNodeList = linkNodeList;
+        this.ttl = DEFAULT_TTL;
+    }
+
+}
