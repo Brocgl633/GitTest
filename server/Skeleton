@@ -1,0 +1,72 @@
+package com.iit.cao.pa3.Server;
+
+import com.iit.cao.pa3.pojo.Invocation;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.lang.reflect.Method;
+import java.net.Socket;
+import java.util.Map;
+
+/**
+ * @description: A helper to unpack messages from the client
+ * @author: Xue Zhang
+ * @date: 2022-02-02
+ * @version: 1.0
+ **/
+public class Skeleton implements Runnable{
+
+    private final Socket socket;
+    private final Map<String, Class<?>> services;
+
+    public Skeleton(Socket socket, Map<String, Class<?>> services) {
+        this.socket = socket;
+        this.services = services;
+    }
+
+    @Override
+    public void run() {
+        ObjectInputStream ois = null;
+        ObjectOutputStream oos = null;
+        try {
+            ois = new ObjectInputStream(socket.getInputStream());
+            oos = new ObjectOutputStream(socket.getOutputStream());
+
+            Invocation invocation = (Invocation) ois.readObject();
+            System.out.println(invocation);
+            Class<?> clazz = services.get(invocation.getInterfaceName());
+            System.out.println(clazz);
+            Method method = clazz.getMethod(invocation.getMethodName(), invocation.getParamTypes());
+            System.out.println(method);
+            Object invoke = method.invoke(clazz.getDeclaredConstructor().newInstance(), invocation.getArgs());
+            System.out.println(invoke);
+            oos.writeObject(invoke);
+            oos.flush();
+            socket.shutdownOutput();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            if (ois != null) {
+                try {
+                    ois.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            if (oos != null) {
+                try {
+                    oos.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+            try {
+                socket.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+}
