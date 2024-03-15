@@ -1,0 +1,45 @@
+package com.iit.cao.pa3.client;
+
+import com.iit.cao.pa3.db.bean.Server;
+import com.iit.cao.pa3.pojo.Invocation;
+import com.iit.cao.pa3.Server.RegistrationCenter;
+
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.net.Socket;
+
+public class Stub {
+
+    private final RegistrationCenter registrationCenter;
+
+    public Stub(RegistrationCenter registrationCenter) {
+        this.registrationCenter = registrationCenter;
+    }
+
+    public Object getStub(final Class clazz, String serverName) {
+        return Proxy.newProxyInstance(clazz.getClassLoader(), new Class[] {clazz}, (proxy, method, args) -> {
+            Server register = registrationCenter.subscribe(serverName, clazz.getName());
+            Socket socket = new Socket(register.getIp(), register.getPort());
+            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+
+            // 封装 rpc 实体类
+            String className = clazz.getName();
+            String methodName = method.getName();
+            Class[] paramTypes = method.getParameterTypes();
+            Invocation invocation = new Invocation(className, methodName, paramTypes, args);
+            out.writeObject(invocation);
+            out.flush();
+
+            Object object = in.readObject();
+            in.close();
+            out.close();
+            socket.close();
+            return object;
+        });
+    }
+}
+
