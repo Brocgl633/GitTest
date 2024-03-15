@@ -1,0 +1,54 @@
+package com.iit.cao.pa3;
+
+import com.iit.cao.pa3.client.WeakPeerClient;
+import com.iit.cao.pa3.pojo.Node;
+import com.iit.cao.pa3.utils.YamlUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+/**
+ * @description: A console to run clients to test system.
+ * @author: Xue Zhang
+ * @date: 2022-03-22
+ * @version: 1.0
+ */
+public class RunClient {
+    private static final List<Node> leafNodes = new ArrayList<>();
+
+    private static void readConfig() {
+        for(int i = 1; i < 31; i++) {
+            Node leafNode = new Node();
+            String key = "WeakPeer#V" + i;
+            String ip = (String) YamlUtil.getInstance().getValue(key, "ip");
+            Integer serverPort = (Integer) YamlUtil.getInstance().getValue(key, "serverPort");
+            Integer clientPort = (Integer) YamlUtil.getInstance().getValue(key, "clientPort");
+            Object links = YamlUtil.getInstance().getValue(key, "linkNodes");
+            List<Node> nodes = YamlUtil.transferMapToObject(links);
+            leafNode.setIp(ip);
+            leafNode.setClientPort(clientPort);
+            leafNode.setNodeName(key);
+            leafNode.setServerPort(serverPort);
+            leafNode.setLinkNodeList(nodes);
+            leafNodes.add(leafNode);
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        Scanner input = new Scanner(System.in);
+        readConfig();
+        while (true) {
+            System.out.println("choose the client: ");
+            String leafNodeName = input.next();
+            for (Node node : leafNodes) {
+                if(node.getNodeName().equals(leafNodeName)) {
+                    WeakPeerClient client = new WeakPeerClient(node.getNodeName(), node.getLinkNodeList());
+                    System.out.println(client);
+                    client.start();
+                    client.join();
+                }
+            }
+        }
+    }
+}
