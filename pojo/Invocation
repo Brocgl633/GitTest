@@ -1,0 +1,28 @@
+package com.iit.cao.pa3.pojo;
+
+import lombok.Data;
+
+import java.io.Serializable;
+import java.util.Arrays;
+
+@Data
+public class Invocation implements Serializable {
+
+    private static final long serialVersionID = 1L;
+
+    private String interfaceName;
+
+    private String methodName;
+
+    private Class[] paramTypes;
+
+    private Object[] args;
+
+    public Invocation(String interfaceName, String methodName, Class[] paramTypes, Object[] args) {
+        this.interfaceName = interfaceName;
+        this.methodName = methodName;
+        this.paramTypes = paramTypes;
+        this.args = args;
+    }
+
+}
