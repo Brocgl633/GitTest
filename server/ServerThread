@@ -1,0 +1,74 @@
+package com.iit.cao.pa3.Server;
+
+import com.iit.cao.pa3.api.WeakPeerService;
+import com.iit.cao.pa3.api.SuperPeerService;
+import com.iit.cao.pa3.pojo.Constants;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+/**
+ * @description: An abstract of server function
+ * @author: Xue Zhang
+ * @date: 2022-02-15
+ * @version: 1.0
+ **/
+public class ServerThread extends Thread{
+
+    private static final Map<String, Class<?>> services = new HashMap<>();
+
+    private static final RegistrationCenter REGISTRATION_CENTER_UTIL = new RegistrationCenter();
+
+    private final String serverName;
+
+    private final String serverIP;
+
+    private final Integer serverPort;
+
+
+    public ServerThread (String serverName, String serverIP, Integer serverPort) {
+        this.serverName = serverName;
+        this.serverIP = serverIP;
+        this.serverPort = serverPort;
+    }
+
+    public void addServer(){
+        if(serverName.startsWith("Super")) {
+            services.put(SuperPeerService.class.getName(), SuperPeerServiceImpl.class);
+        } else {
+            services.put(WeakPeerService.class.getName(), WeakPeerServiceImpl.class);
+        }
+        for(String key: services.keySet()) {
+            REGISTRATION_CENTER_UTIL.registerServer(serverName, serverIP, serverPort, "active", key);
+        }
+    }
+
+    @Override
+    public void run() {
+
+        // 1. create a server
+        ExecutorService newCachedThreadPool = Executors.newCachedThreadPool();
+
+        ServerSocket serverSocket;
+
+        try {
+            serverSocket = new ServerSocket(serverPort);
+
+            serverSocket.setSoTimeout(Constants.SOCKET_SO_TIMEOUT);
+
+            while (true) {
+                final Socket socket = serverSocket.accept();
+
+                newCachedThreadPool.execute(new Skeleton(socket, services));
+
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+}
