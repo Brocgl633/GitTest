@@ -8,30 +8,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-/**
- * @description: A console to run clients to test system.
- * @author: Xue Zhang
- * @date: 2022-03-22
- * @version: 1.0
- */
-public class RunClient {
+public class ClientApplication {
     private static final List<Node> leafNodes = new ArrayList<>();
 
     private static void readConfig() {
         for(int i = 1; i < 31; i++) {
-            Node leafNode = new Node();
+            Node weakPeerNode = new Node();
             String key = "WeakPeer#V" + i;
             String ip = (String) YamlUtil.getInstance().getValue(key, "ip");
             Integer serverPort = (Integer) YamlUtil.getInstance().getValue(key, "serverPort");
             Integer clientPort = (Integer) YamlUtil.getInstance().getValue(key, "clientPort");
             Object links = YamlUtil.getInstance().getValue(key, "linkNodes");
             List<Node> nodes = YamlUtil.transferMapToObject(links);
-            leafNode.setIp(ip);
-            leafNode.setClientPort(clientPort);
-            leafNode.setNodeName(key);
-            leafNode.setServerPort(serverPort);
-            leafNode.setLinkNodeList(nodes);
-            leafNodes.add(leafNode);
+            weakPeerNode.setIp(ip);
+            weakPeerNode.setClientPort(clientPort);
+            weakPeerNode.setNodeName(key);
+            weakPeerNode.setServerPort(serverPort);
+            weakPeerNode.setLinkNodeList(nodes);
+            leafNodes.add(weakPeerNode);
         }
     }
 
