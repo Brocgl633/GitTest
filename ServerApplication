@@ -7,41 +7,37 @@ import com.iit.cao.pa3.utils.YamlUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @description: A start program for this project
- * @author: Xue Zhang
- * @date: 2022-03-01
- * @version: 1.0
- **/
-public class Application {
+public class ServerApplication {
 
     private static final List<Node> superPeers = new ArrayList<>();
 
     public static void readConfig() {
         for(int i = 1; i < 11; i++) {
-            Node superPeer = new Node();
+            Node superPeerNode = new Node();
             String key = "SuperPeer#V" + i;
             String ip = (String) YamlUtil.getInstance().getValue(key, "ip");
             Integer serverPort = (Integer) YamlUtil.getInstance().getValue(key, "serverPort");
             Integer clientPort = (Integer) YamlUtil.getInstance().getValue(key, "clientPort");
             Object links = YamlUtil.getInstance().getValue(key, "linkNodes");
             List<Node> nodes = YamlUtil.transferMapToObject(links);
-            superPeer.setIp(ip);
-            superPeer.setClientPort(clientPort);
-            superPeer.setNodeName(key);
-            superPeer.setServerPort(serverPort);
-            superPeer.setLinkNodeList(nodes);
-            superPeers.add(superPeer);
+            superPeerNode.setIp(ip);
+            superPeerNode.setClientPort(clientPort);
+            superPeerNode.setNodeName(key);
+            superPeerNode.setServerPort(serverPort);
+            superPeerNode.setLinkNodeList(nodes);
+            superPeers.add(superPeerNode);
         }
-
     }
 
     public static void main(String[] args) {
         readConfig();
         for(Node node: superPeers) {
             ServerThread server = new ServerThread(node.getNodeName(), node.getIp(), node.getServerPort());
+            System.out.println(node.getNodeName() + " inserted into database ...");
             server.addServer();
+            System.out.println(node.getNodeName() + " continues to provide services ...");
             server.start();
         }
     }
+
 }
