@@ -1,21 +1,21 @@
 package com.iit.cao.pa3.Server;
 
-import com.iit.cao.pa3.db.bean.Peer;
-import com.iit.cao.pa3.db.dao.PeerDao;
-import com.iit.cao.pa3.db.Impl.PeerDaoImpl;
+import com.iit.cao.pa3.database.bean.Peer;
+import com.iit.cao.pa3.database.dao.PeerDao;
+import com.iit.cao.pa3.database.Impl.PeerDaoImpl;
+import com.iit.cao.pa3.pojo.Constants;
 import com.iit.cao.pa3.utils.JdbcUtil;
 import com.iit.cao.pa3.api.SuperPeerService;
 import com.iit.cao.pa3.pojo.Node;
-import com.iit.cao.pa3.pojo.InvalidationMessage;
-import com.iit.cao.pa3.pojo.QueryMessage;
+import com.iit.cao.pa3.pojo.UpdateMessage;
+import com.iit.cao.pa3.pojo.Message;
 import com.iit.cao.pa3.pojo.Response;
+import com.iit.cao.pa3.utils.LogUtil;
 import com.iit.cao.pa3.utils.YamlUtil;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
@@ -23,23 +23,19 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.util.*;
 
-/**
- * @description: An implementation of services offered by remote servers.
- * @author: Xue Zhang
- * @date: 2022-03-18
- * @version: 1.0
- */
 public class SuperPeerServiceImpl implements SuperPeerService {
+
+    private static final LogUtil log = new LogUtil("SuperPeer");
 
     private static final PeerDao dao = new PeerDaoImpl();
 
-    private static final Map<String, Map<String, QueryMessage>> maps;
+    private static final Map<String, Map<String, Message>> nodeNameMsgMap;
 
-    private static final Map<String, Map<String, InvalidationMessage>> invalidationMaps;
+    private static final Map<String, Map<String, UpdateMessage>> modifiedFileMsgMap;
 
     static {
-        maps = new HashMap<>();
-        invalidationMaps = new HashMap<>();
+        nodeNameMsgMap = new HashMap<>();
+        modifiedFileMsgMap = new HashMap<>();
     }
 
     private String getFileMd5(String fileName) throws IOException, NoSuchAlgorithmException {
@@ -52,154 +48,160 @@ public class SuperPeerServiceImpl implements SuperPeerService {
     }
 
     @Override
-    public Response registry(Integer clientID, String serverName, File file) {
+    public Response register(Integer peerId, String serverName, File file) {
         Connection conn = null;
         try {
             conn = JdbcUtil.getConnection();
-            FileInputStream fis = new FileInputStream(file);
-            FileChannel fc = fis.getChannel();
-            String fileType = "copy";
-            String fileTTR = "unexpired";
-            // System.out.println(peer);
+
+            log.write(serverName + " receives the register request ...");
+            log.write("Register file ===> " + file);
+
+            String lifeCycle = Constants.LIFE_CYCLE_TYPE_UNEXPIRED;
+            String fileType;
             if (file.canRead() && file.canWrite()) {
-                fileType = "master";
+                fileType = Constants.FILE_TYPE_MASTER;
+            } else {
+                fileType = Constants.FILE_TYPE_COPY;
             }
-            Peer peer = new Peer(null, clientID, serverName, file.getName(), file.getPath());
-            // System.out.println(peer);
-            Peer newPeer = dao.getPeerByAll(conn, peer);
-            peer.setTtr(fileTTR);
-            if (newPeer == null) {
-                if (fileType.equals("copy")) {
-                    Peer masterPeer = dao.getPeerByFileNameAndType(conn, file.getName(), "master");
-                    peer.setVersion(masterPeer.getVersion());
+
+            Peer newPeer = new Peer(peerId, serverName, file.getName(), file.getPath());
+            Peer originalPeer = dao.getOriginalPeer(conn, newPeer);
+            newPeer.setLifeCycle(lifeCycle);
+            if (originalPeer == null) {
+                if (fileType.equals(Constants.FILE_TYPE_COPY)) {
+                    Peer masterPeer = dao.getPeerByFileNameAndType(conn, file.getName(), Constants.FILE_TYPE_MASTER);
+                    newPeer.setVersion(masterPeer.getVersion());
                 } else {
-                    peer.setVersion(0);
+                    newPeer.setVersion(0);
                 }
-                peer.setFilesize(fc.size());
-                peer.setType(fileType);
-                peer.setState("valid");
-                dao.insert(conn, peer);
-            } else if (newPeer.getFilesize() != fc.size()) {
-                Integer versionId = newPeer.getVersion() + 1;
-                peer.setVersion(versionId);
-                peer.setType(fileType);
-                peer.setFilesize(fc.size());
-                peer.setState("valid");
-                newPeer.setState("invalid");
-                dao.update(conn, newPeer);
-                dao.insert(conn, peer);
+                newPeer.setFileSize(file.length());
+                newPeer.setType(fileType);
+                newPeer.setState(Constants.PEER_STATE_VALID);
+                dao.insert(conn, newPeer);
+                log.write("File [ " + file.getName() + " ] is the first registration ...");
+            } else if (originalPeer.getFileSize() != file.length()) {
+                Integer versionId = originalPeer.getVersion() + 1;
+                newPeer.setVersion(versionId);
+                newPeer.setFileSize(file.length());
+                newPeer.setType(fileType);
+                newPeer.setState(Constants.PEER_STATE_VALID);
+                dao.insert(conn, newPeer);
+                originalPeer.setState(Constants.PEER_STATE_INVALID);
+                dao.update(conn, originalPeer);
+                log.write("New file [ " + file.getName() + " ] has registered and updated the original file ...");
             }
-            Response response;
-            response = new Response(200, "register success");
-            return response;
+            return new Response(200, "File [ " + file.getName() + " ] registered successfully.");
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
             JdbcUtil.closeResource(conn, null, null);
         }
-        return new Response(401, "register failed!");
+        return new Response(401, "File [ " + file.getName() + " ] failed to register.");
     }
 
     @Override
-    public Response registryAll(Integer clientID, String serverName, List<File> lists) {
+    public Response registerAllFiles(Integer peerId, String serverName, List<File> lists) {
         Connection conn = null;
         try {
             conn = JdbcUtil.getConnection();
-            // System.out.println(conn);
-            String fileType = "copy";
-            String fileState = "invalid";
-            String fileTTR = "expired";
+
+            log.write(serverName + " receives the batch registration request ...");
+
+            String fileType = Constants.FILE_TYPE_COPY;
+            String lifeCycle = Constants.LIFE_CYCLE_TYPE_EXPIRED;
             for (File file : lists) {
-                FileInputStream fis = new FileInputStream(file);
-                FileChannel fc = fis.getChannel();
-                // System.out.println(file.getName());
+
+                log.write("Register file ===> " + file);
+
                 if (file.canRead() && file.canWrite()) {
-                    System.out.println(file.getName());
-                    fileType = "master";
-                    fileState = "valid";
-                    fileTTR = "unexpired";
+                    fileType = Constants.FILE_TYPE_MASTER;
+                    lifeCycle = Constants.LIFE_CYCLE_TYPE_UNEXPIRED;
                 }
-                Peer peer = new Peer(null, clientID, serverName, file.getName(), file.getPath());
-                // System.out.println(peer);
-                Peer newPeer = dao.getPeerByAll(conn, peer);
-                if (newPeer == null) {
-                    if (fileType.equals("copy")) {
-                        Peer masterPeer = dao.getPeerByFileNameAndType(conn, file.getName(), "master");
-                        peer.setVersion(masterPeer.getVersion());
+
+                Peer newPeer = new Peer(peerId, serverName, file.getName(), file.getPath());
+                Peer originalPeer = dao.getOriginalPeer(conn, newPeer);
+                newPeer.setLifeCycle(lifeCycle);
+                if (originalPeer == null) {
+                    if (fileType.equals(Constants.FILE_TYPE_COPY)) {
+                        Peer masterPeer = dao.getPeerByFileNameAndType(conn, file.getName(), Constants.FILE_TYPE_MASTER);
+                        newPeer.setVersion(masterPeer.getVersion());
                     } else {
-                        peer.setVersion(0);
+                        newPeer.setVersion(0);
                     }
-                    peer.setFilesize(fc.size());
-                    peer.setType(fileType);
-                    peer.setState(fileState);
-                    peer.setTtr(fileTTR);
-                    peer.setState("valid");
-                    dao.insert(conn, peer);
-                } else if (newPeer.getFilesize() != fc.size()) {
-                    Integer versionId = newPeer.getVersion() + 1;
-                    peer.setVersion(versionId);
-                    peer.setType(fileType);
-                    peer.setFilesize(fc.size());
-                    peer.setState("valid");
-                    newPeer.setState("invalid");
-                    dao.update(conn, newPeer);
-                    dao.insert(conn, peer);
+                    newPeer.setFileSize(file.length());
+                    newPeer.setType(fileType);
+                    newPeer.setState(Constants.PEER_STATE_VALID);
+                    dao.insert(conn, newPeer);
+                    log.write("File [ " + file.getName() + " ] is the first registration ...");
+                } else if (originalPeer.getFileSize() != file.length()) {
+                    Integer versionId = originalPeer.getVersion() + 1;
+                    newPeer.setVersion(versionId);
+                    newPeer.setFileSize(file.length());
+                    newPeer.setType(fileType);
+                    newPeer.setState(Constants.PEER_STATE_VALID);
+                    originalPeer.setState(Constants.PEER_STATE_INVALID);
+                    dao.update(conn, originalPeer);
+                    dao.insert(conn, newPeer);
+                    log.write("New file [ " + file.getName() + " ] has registered and updated the original file ...");
                 }
             }
-            Response response;
-            response = new Response(200, "register success");
-            return response;
+            return new Response(200, "All files registered successfully.");
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
             JdbcUtil.closeResource(conn, null, null);
         }
-        return new Response(401, "register failed!");
+
+        return new Response(401, "There are some errors in registration ...");
     }
 
     @Override
-    public Response deregister(Integer clientID, String fileName, Boolean isUpdate) {
+    public Response unregisterFile(Integer peerId, String fileName, Boolean isUpdate) {
         Connection conn = null;
         try {
             conn = JdbcUtil.getConnection();
-            // System.out.println(conn);
-            // 1. checking whether the file to be deleted exists
-            List<Peer> lists = dao.getPeerByPeerIdAndFileName(conn, clientID, fileName);
+
+            log.write("Remote server object receives the unregister request ...");
+
+            List<Peer> lists = dao.getPeerByPeerIdAndFileName(conn, peerId, fileName);
             if (lists.isEmpty()) {
-                //System.out.println("the file you want to deregister doesn't exist!");
-                return new Response(303, "no such a registered file");
+                log.write("File [ " + fileName + "] doesn't exist!");
+                return new Response(401, "File [ " + fileName + "] doesn't exist!");
             }
-            // 2. exits:
-            Integer versionID = null;
+
+            Integer versionId = null;
             for (Peer peer : lists) {
                 if (isUpdate) {
-                    if (peer.getState().equals("invalid")) {
-                        versionID = peer.getVersion();
+                    if (peer.getState().equals(Constants.PEER_STATE_INVALID)) {
+                        versionId = peer.getVersion();
                         dao.deleteById(conn, peer.getId());
                     }
                 } else {
                     dao.deleteById(conn, peer.getId());
                 }
             }
-            return new Response(200, "deregister operation is over", versionID);
+            log.write("File [ " + fileName + " ] unregistered successfully.");
+            return new Response(200, "File [ " + fileName + " ] unregistered successfully.", versionId);
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
             JdbcUtil.closeResource(conn, null, null);
         }
-        return null;
+
+        return new Response(401, "There are some errors in deregistration ...");
     }
 
-    private void deleteLocalFiles(String serverName, String fileName, Integer version, Integer clientID) {
+    private void deleteFileInSameVersion(String serverName, String fileName, Integer version, Integer peerId) {
         Connection conn = null;
         try {
             conn = JdbcUtil.getConnection();
-            List<Peer> lists = dao.getPeerByServerAndFileName(conn, serverName, fileName, version, clientID);
+            List<Peer> lists = dao.getPeerListInSameVersion(conn, peerId, serverName, fileName, version);
             if (lists.isEmpty()) {
-                // System.out.println("the file you want to deregister doesn't exist!");
+                log.write("File [ " + fileName + " ] failed to deregister. It doesn't exist!");
                 return;
             }
-            // 2. exits:
+
+            log.write("Update message with file [ " + fileName + " ] hitting in " + serverName + " !!!");
             for (Peer peer : lists) {
                 dao.deleteById(conn, peer.getId());
             }
@@ -225,32 +227,46 @@ public class SuperPeerServiceImpl implements SuperPeerService {
     }
 
     @Override
-    public List<Peer> queryFiles(QueryMessage message) {
+    public List<Peer> queryFile(Message message) {
         List<Peer> res = new ArrayList<>();
-        Queue<QueryMessage> queue = new ArrayDeque<>();
+        Queue<Message> queue = new ArrayDeque<>();
         queue.offer(message);
+
         while (!queue.isEmpty()) {
             int size = queue.size();
-            System.out.println(size);
             for (int i = 0; i < size; i++) {
-                QueryMessage msg = queue.poll();
+                Message msg = queue.poll();
                 assert msg != null;
                 String nodeName = msg.getNodeName();
                 String messageId = msg.getMessageId();
                 Integer sequenceNum = msg.getSequenceNum();
                 String fileName = msg.getFileName();
                 Byte curTtl = msg.getTtl();
+
+                Map<String, Message> curMap = new HashMap<>();
+                curMap.put(msg.getMessageId(), msg);
+
                 for (Node neighbor : msg.getLinkNodeList()) {
-                    List<Peer> result = getPeerContainFile(neighbor.getNodeName(), msg.getFileName());
+                    String neighborNodeName = neighbor.getNodeName();
+                    if (nodeNameMsgMap.containsKey(neighborNodeName)) {
+                        if (nodeNameMsgMap.get(neighborNodeName).containsKey(messageId)) {
+                            continue;
+                        } else {
+                            nodeNameMsgMap.get(neighborNodeName).put(messageId, msg);
+                        }
+                    } else {
+                        nodeNameMsgMap.put(neighborNodeName, curMap);
+                    }
+                    List<Peer> result = getPeerContainFile(neighborNodeName, fileName);
                     res.addAll(result);
 
                     // 刷新 ttl
                     if (curTtl != 0) {
-                        QueryMessage newMsg = new QueryMessage(nodeName, fileName, sequenceNum, messageId, null);
+                        Message newMsg = new Message(nodeName, fileName, sequenceNum, messageId, null);
                         newMsg.setTtl((byte) (curTtl - 1));
                         Object links = YamlUtil.getInstance().getValue(neighbor.getNodeName(), "linkNodes");
-                        List<Node> nodes = YamlUtil.transferMapToObject(links);
-                        newMsg.setLinkNodeList(nodes);
+                        List<Node> linkNodeList = YamlUtil.transferMapToObject(links);
+                        newMsg.setLinkNodeList(linkNodeList);
                         queue.offer(newMsg);
                     }
                 }
@@ -260,71 +276,70 @@ public class SuperPeerServiceImpl implements SuperPeerService {
     }
 
     @Override
-    public void pushInvalidation(InvalidationMessage message) {
-        Queue<InvalidationMessage> queue = new ArrayDeque<>();
+    public void broadcastUpdateMsg(UpdateMessage message) {
+        log.write("Remote server object receives the broadcast update file message request ...");
+        Queue<UpdateMessage> queue = new ArrayDeque<>();
         queue.add(message);
-        Map<String, InvalidationMessage> seen;
+
+        log.write("During the update broadcast :");
         while (!queue.isEmpty()) {
             int size = queue.size();
             for (int i = 0; i < size; i++) {
-                InvalidationMessage msg = queue.poll();
+                UpdateMessage msg = queue.poll();
                 assert msg != null;
-                seen = new HashMap<>();
-                seen.put(msg.getMessageId(), msg);
-                for (Node node : msg.getLinkNodeList()) {
-                    if (invalidationMaps.containsKey(node.getNodeName())) {
-                        if (invalidationMaps.get(node.getNodeName()).containsKey(msg.getMessageId())) {
+
+                Map<String, UpdateMessage> curMap = new HashMap<>();
+                curMap.put(msg.getMessageId(), msg);
+                for (Node neighbor : msg.getLinkNodeList()) {
+                    String neighborNodeName = neighbor.getNodeName();
+                    if (modifiedFileMsgMap.containsKey(neighborNodeName)) {
+                        if (modifiedFileMsgMap.get(neighborNodeName).containsKey(msg.getMessageId())) {
                             continue;
                         } else {
-                            invalidationMaps.get(node.getNodeName()).put(msg.getMessageId(), msg);
+                            modifiedFileMsgMap.get(neighborNodeName).put(msg.getMessageId(), msg);
                         }
                     } else {
-                        invalidationMaps.put(node.getNodeName(), seen);
+                        modifiedFileMsgMap.put(neighborNodeName, curMap);
                     }
 
-                    // delete registered file in the super peer;
-                    String[] s = node.getNodeName().split("_");
-                    int id = Integer.parseInt(s[s.length - 1]);
-                    List<String> leafNodes = new ArrayList<>();
+                    log.write(neighbor + " receives the message ...");
+
+                    String[] splits = neighborNodeName.split("#V");
+                    int superPeerId = Integer.parseInt(splits[splits.length - 1]);
+                    List<String> WeakNodes = new ArrayList<>();
                     for (int j = 1; j <= 3; j++) {
-                        int leafNodeId = (id - 1) * 3 + j;
-                        leafNodes.add("leafNode_" + leafNodeId);
+                        int weakPeerId = (superPeerId - 1) * 3 + j;
+                        WeakNodes.add("WeakPeer#V" + weakPeerId);
                     }
 
-                    // delete registered file in the super peer;
-                    for (String name : leafNodes) {
-                        String action = (String) YamlUtil.getInstance().getValue(name, "action");
-                        if (action.equals("push")) {
-                            String[] temp = name.split("_");
-                            Integer clientID = Integer.parseInt(temp[temp.length - 1]);
-                            deleteLocalFiles(node.getNodeName(), msg.getFileName(), message.getVersion(), clientID);
-                        }
+                    // delete modified file with the same file name and versionId
+                    log.write("Delete modified file with the same file name and versionId.");
+                    for (String name : WeakNodes) {
+                        String[] curSplit = name.split("#V");
+                        Integer weakPeerId = Integer.parseInt(curSplit[curSplit.length - 1]);
+                        deleteFileInSameVersion(neighborNodeName, msg.getFileName(), message.getVersion(), weakPeerId);
                     }
 
                     if (msg.getTtl() != 0) {
-                        InvalidationMessage newMsg = new InvalidationMessage();
+                        UpdateMessage newMsg = new UpdateMessage();
                         newMsg.setClientName(msg.getClientName());
-                        newMsg.setMessageId(msg.getMessageId());
-                        newMsg.setSequenceNum(msg.getSequenceNum());
                         newMsg.setFileName(msg.getFileName());
-                        int newTtl = msg.getTtl() - 1;
-                        newMsg.setTtl((byte) newTtl);
-                        Object links = YamlUtil.getInstance().getValue(node.getNodeName(), "linkNodes");
-                        List<Node> nodes = YamlUtil.transferMapToObject(links);
-                        newMsg.setLinkNodeList(nodes);
+                        newMsg.setSequenceNum(msg.getSequenceNum());
+                        newMsg.setMessageId(msg.getMessageId());
+                        Object links = YamlUtil.getInstance().getValue(neighborNodeName, "linkNodes");
+                        List<Node> linkNodeList = YamlUtil.transferMapToObject(links);
+                        newMsg.setLinkNodeList(linkNodeList);
+                        newMsg.setTtl((byte) (msg.getTtl() - 1));
                         queue.add(newMsg);
                     }
-                    // notification that local leafNode delete cached files
 
-                    for (String name : leafNodes) {
-                        String path = "src/dir/" + name;
+                    // delete modified file in local directory
+                    log.write("Delete modified file in local directory.");
+                    for (String weakNodeName : WeakNodes) {
+                        String path = "src/dir/" + weakNodeName;
                         File file = new File(path);
-                        if (!name.equals(message.getClientName())) {
-                            try {
-                                deleteSpecificFile(file, name, message.getFileName());
-                            } catch (IOException ex) {
-                                ex.printStackTrace();
-                            }
+                        if (!weakNodeName.equals(message.getClientName())) {
+                            deleteLocalFile(file, message.getFileName(), weakNodeName);
                         }
                     }
                 }
@@ -334,50 +349,61 @@ public class SuperPeerServiceImpl implements SuperPeerService {
     }
 
     @Override
-    public Response pollVersion(File file, int peerId) {
+    public Response freshFileVersion(File file, Integer peerId) {
         Connection conn = null;
-        int data = 5;
+        int invalidCount = 5;
         try {
             conn = JdbcUtil.getConnection();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
 
-        Peer peer = dao.getPeerByFileNameAndPeerId(conn, file.getName(), peerId);
-        if (peer != null) {
-            peer.setTtr("expired");
-            dao.update(conn, peer);
-            int masterVersion = dao.getPeerByFileNameAndType(conn, file.getName(), "master").getVersion();
-            if (peer.getVersion() != masterVersion) {
-                peer.setState("invalid");
+        List<Peer> peerList = dao.getPeerByPeerIdAndFileName(conn, peerId, file.getName());
+        for (Peer peer : peerList) {
+            if (peer != null) {
+                peer.setLifeCycle(Constants.LIFE_CYCLE_TYPE_EXPIRED);
                 dao.update(conn, peer);
-                data = -1;
-            } else {
-                peer.setTtr("unexpired");
-                dao.update(conn, peer);
-            }
+                int masterVersion = dao.getPeerByFileNameAndType(conn, file.getName(), Constants.FILE_TYPE_MASTER).getVersion();
+                if (peer.getVersion() != masterVersion) {
+                    peer.setState(Constants.PEER_STATE_INVALID);
+                    dao.update(conn, peer);
+                    invalidCount = -1;
+                } else {
+                    peer.setLifeCycle(Constants.LIFE_CYCLE_TYPE_UNEXPIRED);
+                    dao.update(conn, peer);
+                }
 
+            }
         }
 
-        return new Response(200, "Fresh copy-files successfully !!!", data);
+        return new Response(200, "Fresh copy-files successfully !!!", invalidCount);
     }
 
-    private static void deleteSpecificFile(File dir, String name, String fileName) throws IOException {
-        if (dir.isDirectory()) {
-            File[] fileList = dir.listFiles();
+
+    @Override
+    public Response unregisterPeer(String serverName, Integer peerId) {
+        Connection conn = null;
+        try {
+            conn = JdbcUtil.getConnection();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        dao.deleteByServerNameAndPeerId(conn, serverName, peerId);
+
+        return new Response(200, "Delete weak peer [ WeakPeer#V" + peerId + " ] successfully !!!");
+    }
+
+    private void deleteLocalFile(File file, String fileName, String weakNodeName) {
+        if (file.isDirectory()) {
+            File[] fileList = file.listFiles();
             for (int i = 0; i < Objects.requireNonNull(fileList).length; i++) {
-                deleteSpecificFile(fileList[i], name, fileName);
+                deleteLocalFile(fileList[i], fileName, weakNodeName);
             }
         } else {
-            if (dir.getName().equals(fileName)) {
-                String action = (String) YamlUtil.getInstance().getValue(name, "action");
-                if (action.equals("push")) {
-                    System.out.println("Hit an outdated file, please delete it.");
-                    System.out.println(dir.toPath());
-                    // Files.delete(dir.toPath());
-                    boolean delete = dir.delete();
-                    // System.out.println(delete);
-                }
+            if (file.getName().equals(fileName)) {
+                log.write("Update message hits the local file [ " + fileName + " ] in " + weakNodeName + " ...");
+                file.delete();
             }
         }
     }
