@@ -1,6 +1,7 @@
 package com.iit.cao.pa3.Server;
 
 import com.iit.cao.pa3.pojo.Invocation;
+import com.iit.cao.pa3.utils.LogUtil;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -9,63 +10,59 @@ import java.lang.reflect.Method;
 import java.net.Socket;
 import java.util.Map;
 
-/**
- * @description: A helper to unpack messages from the client
- * @author: Xue Zhang
- * @date: 2022-02-02
- * @version: 1.0
- **/
-public class Skeleton implements Runnable{
+public class Skeleton implements Runnable {
 
     private final Socket socket;
+
     private final Map<String, Class<?>> services;
 
-    public Skeleton(Socket socket, Map<String, Class<?>> services) {
+    private final LogUtil log;
+
+    public Skeleton(Socket socket, Map<String, Class<?>> services, LogUtil log) {
         this.socket = socket;
         this.services = services;
+        this.log = log;
     }
 
     @Override
     public void run() {
-        ObjectInputStream ois = null;
-        ObjectOutputStream oos = null;
+        ObjectInputStream in = null;
+        ObjectOutputStream out = null;
         try {
-            ois = new ObjectInputStream(socket.getInputStream());
-            oos = new ObjectOutputStream(socket.getOutputStream());
-
-            Invocation invocation = (Invocation) ois.readObject();
-            System.out.println(invocation);
-            Class<?> clazz = services.get(invocation.getInterfaceName());
-            System.out.println(clazz);
+            in = new ObjectInputStream(socket.getInputStream());
+            out = new ObjectOutputStream(socket.getOutputStream());
+            Invocation invocation = (Invocation) in.readObject();
+            String proxyName = invocation.getInterfaceName();
+            log.write("Proxy object [ " + proxyName + " ] receives the rpc request ...");
+            log.write("Invocation ===> " + invocation);
+            Class<?> clazz = services.get(proxyName);
             Method method = clazz.getMethod(invocation.getMethodName(), invocation.getParamTypes());
-            System.out.println(method);
             Object invoke = method.invoke(clazz.getDeclaredConstructor().newInstance(), invocation.getArgs());
-            System.out.println(invoke);
-            oos.writeObject(invoke);
-            oos.flush();
+            log.write(proxyName + " has invoked the method [ " + invoke + " ].");
+            out.writeObject(invoke);
+            out.flush();
             socket.shutdownOutput();
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
-            if (ois != null) {
+            if (in != null) {
                 try {
-                    ois.close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
-            if (oos != null) {
+            if (out != null) {
                 try {
-                    oos.close();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+                    out.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
             try {
                 socket.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
