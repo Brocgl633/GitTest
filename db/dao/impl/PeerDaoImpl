@@ -1,4 +1,4 @@
-package com.iit.cao.pa3.database.Impl;
+package com.iit.cao.pa3.database.impl;
 
 import com.iit.cao.pa3.database.bean.Peer;
 import com.iit.cao.pa3.database.dao.BaseDAO;
@@ -19,7 +19,7 @@ public class PeerDaoImpl extends BaseDAO<Peer> implements PeerDao {
 
     @Override
     public void deleteById(Connection conn, int id) {
-        String sql = "delete from peer where id = ?";
+        String sql = "delete from peer where id=?";
         update(conn, sql, id);
     }
 
@@ -38,33 +38,8 @@ public class PeerDaoImpl extends BaseDAO<Peer> implements PeerDao {
     }
 
     @Override
-    public Peer getPeerByID(Connection conn, int id) {
-        String sql = "select * from peer where id = ?";
-        Peer peer;
-        peer = getInstance(conn, sql, id);
-        return peer;
-    }
-
-    @Override
-    public List<Peer> getAll(Connection conn) {
-        String sql = "select * from peer";
-        List<Peer> list = getForList(conn, sql);
-        return list;
-    }
-
-    @Override
-    public List<Peer> getPeerByFileName(Connection conn, String name) {
-        String sql = "select * from peer where fileName = ?";
-        List<Peer> list = getForList(conn, sql, name);
-        //System.out.println(list);
-        return list;
-    }
-
-    @Override
     public List<Peer> getPeerByFileNameAndSeverName(Connection conn, String serverName, String fileName) {
-        String sql = "select * from peer where peerName =? and fileName = ?";
-        System.out.println(serverName);
-        System.out.println(fileName);
+        String sql = "select * from peer where peerName=? and fileName=?";
         return getForList(conn, sql, serverName, fileName);
     }
 
@@ -72,6 +47,12 @@ public class PeerDaoImpl extends BaseDAO<Peer> implements PeerDao {
     public Peer getOriginalPeer(Connection conn, Peer peer) {
         String sql = "select * from peer where peerId=? and peerName=? and fileName=? and filePath=?";
         return getInstance(conn, sql, peer.getPeerId(), peer.getPeerName(), peer.getFileName(), peer.getFilePath());
+    }
+
+    @Override
+    public List<Peer> getAllRegistrationFiles(Connection conn, Integer peerId, String serverName) {
+        String sql = "select * from peer where peerId=? and peerName=?";
+        return getForList(conn, sql, peerId, serverName);
     }
 
     @Override
@@ -92,10 +73,4 @@ public class PeerDaoImpl extends BaseDAO<Peer> implements PeerDao {
         return getForList(conn, sql, peerId, serverName, fileName, version);
     }
 
-    @Override
-    public Peer getPeerByFileNameAndPeerId(Connection conn, String fileName, int peerId) {
-        String sql = "select * from peer where fileName=? and peerId=?";
-        Peer newPeer = getInstance(conn, sql, fileName, peerId);
-        return newPeer;
-    }
 }
