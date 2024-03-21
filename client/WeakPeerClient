@@ -4,20 +4,18 @@ import com.iit.cao.pa3.Server.RegistrationCenter;
 import com.iit.cao.pa3.Server.ServerThread;
 import com.iit.cao.pa3.database.bean.Peer;
 import com.iit.cao.pa3.pojo.Constants;
+import com.iit.cao.pa3.pojo.UpdateMessage;
 import com.iit.cao.pa3.pojo.Message;
 import com.iit.cao.pa3.pojo.Response;
 import com.iit.cao.pa3.api.WeakPeerService;
 import com.iit.cao.pa3.api.SuperPeerService;
 import com.iit.cao.pa3.pojo.Node;
-import com.iit.cao.pa3.pojo.UpdateMessage;
 import com.iit.cao.pa3.utils.*;
 
 import java.io.*;
 import java.util.*;
 
 public class WeakPeerClient extends Thread {
-
-    private static final LogUtil log = new LogUtil("WeakPeer");
 
     private static Integer seqNum = 0;
 
@@ -44,37 +42,39 @@ public class WeakPeerClient extends Thread {
             new File(this.downloadPath).mkdirs();
         }
         this.modifyTime = 0;
-        log.write(peerName + " as a client link into the network ... ");
+        logPrint(peerName + " as a client link into the network ... ", false);
     }
 
     @Override
     public void run() {
         RegistrationCenter registrationCenter = new RegistrationCenter();
-        Stub stub = new Stub(registrationCenter, log);
+        Stub stub = new Stub(registrationCenter);
         String superName = peerLinkNodeList.get(0).getNodeName();
-        log.write(peerName + "'s super peer is " + superName + " ...");
+        logPrint(peerName + "'s super peer is " + superName + " ...", false);
         SuperPeerService superPeerService = (SuperPeerService) stub.getStub(SuperPeerService.class, superName);
         if (superPeerService != null) {
-            log.write(peerName + "got the proxy object from " + superName + " successfully !!!");
+            logPrint(peerName + " got the proxy object from " + superName + " successfully !!!", false);
         }
         Scanner input = new Scanner(System.in);
         timer.schedule(new ScheduleTask(), 0, ttr * 1000);
+        long startTime, endTime, time;
 
         while (true) {
-            System.out.println("****** Hierarchical peer-to-peer (P2P) system ******");
+            System.out.println("\n****** Hierarchical peer-to-peer (P2P) system ******");
             System.out.println("Current client is " + peerName);
             System.out.println("1.Register one file from directory [src/dir/].");
             System.out.println("2.Register all files from directory [src/dir/].");
-            System.out.println("3.Search one file from network.");
-            System.out.println("4.Download file from a specific node.");
-            System.out.println("5.Get files list from the current directory.");
+            System.out.println("3.Search one file from the network.");
+            System.out.println("4.Download file from the network.");
+            System.out.println("5.Get files list from [ " + peerName + " ].");
             System.out.println("6.Deregister one file from the current peer.");
             System.out.println("7.Modify one local file.");
             System.out.println("8.Fresh one file.");
             System.out.println("9.Print super peer log.");
-            System.out.println("10.Print super peer log.");
-            System.out.println("11.Print weak peer log.");
-            System.out.println("12.Exit.");
+            System.out.println("10.Print weak peer log.");
+            System.out.println("11.Print skeleton log.");
+            System.out.println("12.Print stub log.");
+            System.out.println("13.Exit.");
             System.out.print("Please input number : ");
             int option;
 
@@ -87,66 +87,92 @@ public class WeakPeerClient extends Thread {
 
             switch (option) {
                 case 1: {
-                    System.out.println("Please input the file name you want to register : ");
+                    System.out.print("Please input the file name you want to register : ");
                     String fileName = input.next();
                     String filePath = "src/dir/" + fileName;
                     File file = new File(filePath);
                     String[] splits = peerName.split("#V");
                     int weakPeerId = Integer.parseInt(splits[splits.length - 1]);
-                    log.write("Send register request by file name [ " + fileName + " ] in " + peerName + ".");
+                    logPrint("Send register request by file name [ " + fileName + " ] in " + peerName + ".", false);
                     if (file.exists()) {
+                        startTime = System.currentTimeMillis();
                         Response response = superPeerService.register(weakPeerId, superName, file);
-                        System.out.println(response.getMessage());
+                        endTime = System.currentTimeMillis();
+                        time = endTime - startTime;
+                        logPrint(response.getMessage() + " Take " + time + " ms.", true);
                     } else {
-                        System.out.println("There are no file named [ " + fileName + " ] in path 'src/dir/'.");
+                        logPrint("There are no file named [ " + fileName + " ] in path 'src/dir/'.", true);
                     }
                     break;
                 }
                 case 2: {
+                    logPrint("Batch files register request ...", false);
                     List<File> list = FileUtil.getAllFiles(path);
                     String[] splits = peerName.split("#V");
                     int weakPeerId = Integer.parseInt(splits[splits.length - 1]);
+                    startTime = System.currentTimeMillis();
                     Response response = superPeerService.registerAllFiles(weakPeerId, superName, list);
-                    System.out.println(response);
+                    endTime = System.currentTimeMillis();
+                    time = endTime - startTime;
+                    logPrint(response.getMessage() + " Take " + time + " ms.", true);
                     break;
                 }
                 case 3: {
-                    System.out.println("Please input the file name you want to research : ");
+                    System.out.print("Please input the file name you want to research : ");
                     String fileName = input.next();
                     String messageId = UUID.randomUUID().toString().substring(0, 9);
                     addSequence();
                     messageId += seqNum;
                     Message message = new Message(peerName, fileName, seqNum, messageId, peerLinkNodeList);
+                    logPrint("Query file message ===> " + message, false);
+                    startTime = System.currentTimeMillis();
                     List<Peer> peers = superPeerService.queryFile(message);
+                    endTime = System.currentTimeMillis();
+                    time = endTime - startTime;
+                    logPrint("Querying file takes " + time + " ms.", true);
                     for (Peer peer : peers) {
                         System.out.println(peer);
                     }
                     break;
                 }
                 case 4: {
-                    System.out.println("Please input the file name you want to download : ");
+                    System.out.print("Please input the file name you want to download : ");
                     String fileName = input.next();
+                    startTime = System.currentTimeMillis();
                     downloadFile(fileName, superPeerService, stub);
+                    endTime = System.currentTimeMillis();
+                    time = endTime - startTime;
+                    logPrint("Downloading file [ " + fileName + " ] takes " + time + " ms.", true);
                     break;
                 }
                 case 5: {
-                    List<File> list = FileUtil.getAllFiles(path);
-                    for (File file : list) {
-                        System.out.println(file);
+                    String[] splits = peerName.split("#V");
+                    int weakPeerId = Integer.parseInt(splits[splits.length - 1]);
+                    startTime = System.currentTimeMillis();
+                    Response response = superPeerService.displayRegisteredFiles(weakPeerId, superName);
+                    endTime = System.currentTimeMillis();
+                    time = endTime - startTime;
+                    List<Peer> registrationFiles = (List<Peer>) response.getData();
+                    for (Peer regFile : registrationFiles) {
+                        System.out.println("File name [ " + regFile.getFileName() + " ], file size [ " + regFile.getFileSize() + " ] bytes.");
                     }
+                    logPrint(response.getMessage() + " Take " + time + " ms.", true);
                     break;
                 }
                 case 6: {
-                    System.out.println("Please input the file you want to unregister: ");
+                    System.out.print("Please input the file you want to unregister: ");
                     String fileName = input.next();
                     String[] splits = peerName.split("#V");
                     int weakPeerId = Integer.parseInt(splits[splits.length - 1]);
+                    startTime = System.currentTimeMillis();
                     Response response = superPeerService.unregisterFile(weakPeerId, fileName, false);
-                    System.out.println(response.getMessage());
+                    endTime = System.currentTimeMillis();
+                    time = endTime - startTime;
+                    logPrint(response.getMessage() + " takes " + time + " ms.", true);
                     break;
                 }
                 case 7: {
-                    System.out.println("Please input the file you want to modify in '/" + peerName + "/' directory : ");
+                    System.out.print("Please input the file you want to modify in '/" + peerName + "/' directory : ");
                     String fileName = input.next();
                     String[] splits = peerName.split("#V");
                     int weakPeerId = Integer.parseInt(splits[splits.length - 1]);
@@ -154,9 +180,12 @@ public class WeakPeerClient extends Thread {
                     File file = new File(filePath);
                     if (file.exists()) {
                         if (file.canRead() && file.canWrite()) {
+
+                            startTime = System.currentTimeMillis();
+
                             try {
                                 BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true));
-                                writer.write("Modify this file " + (++modifyTime) + "times.");
+                                writer.write("Modify this file " + (++modifyTime) + " times.");
                                 writer.newLine();
                                 writer.close();
                             } catch (IOException ex) {
@@ -165,31 +194,35 @@ public class WeakPeerClient extends Thread {
 
                             // 1. register the new file
                             Response response = superPeerService.register(weakPeerId, superName, file);
-                            System.out.println(response);
+                            logPrint(response.getMessage(), true);
 
                             // 2. deregister the previous file
                             response = superPeerService.unregisterFile(weakPeerId, fileName, true);
-                            System.out.println(response.getMessage());
+                            logPrint(response.getMessage(), true);
 
                             // 3. broadcast update message to all nodes in the network
                             String messageId = UUID.randomUUID().toString().substring(0, 9);
                             addSequence();
                             messageId += seqNum;
                             UpdateMessage updateMsg = new UpdateMessage(peerName, fileName, seqNum, (Integer) response.getData(), messageId, peerLinkNodeList);
-                            System.out.println("The modified file's original version is " + response.getData());
+                            System.out.println("The modified file's original version is " + response.getData() + ".");
                             superPeerService.broadcastUpdateMsg(updateMsg);
+
+                            endTime = System.currentTimeMillis();
+                            time = endTime - startTime;
+                            logPrint("Modifying file [ " + fileName + " ] and broadcast update message take " + time + " ms.", true);
                         } else {
-                            System.out.println("Modified file is the copy with read-only authorization. Please input again.");
+                            logPrint("Modified file is the copy with read-only authorization. Please input again.", true);
                         }
                     } else {
-                        System.out.println("Modified file does not exit. Please input again.");
+                        logPrint("Modified file does not exit. Please input again.", true);
                     }
                     break;
                 }
                 case 8: {
-                    System.out.println("Please input a file name you want to refresh in '/download/' directory : ");
+                    System.out.print("Please input a file name you want to refresh in '/" + peerName + "/' directory : ");
                     String fileName = input.next();
-                    String filePath = downloadPath + fileName;
+                    String filePath = "src/dir/" + peerName + "/" + fileName;
                     File file = new File(filePath);
                     if (file.exists()) {
                         System.out.println("Refresh operation hits the file ===> [ " + fileName + " ].");
@@ -197,15 +230,20 @@ public class WeakPeerClient extends Thread {
                         // delete this file(original) in database
                         String[] splits = peerName.split("#V");
                         int weakPeerId = Integer.parseInt(splits[splits.length - 1]);
-                        Response response = superPeerService.unregisterFile(weakPeerId, fileName, false);
+                        startTime = System.currentTimeMillis();
+                        Response response = superPeerService.unregisterFile(weakPeerId, fileName, true);
                         System.out.println(response.getMessage());
 
                         // delete this file(original) in the current WeakPeerId directory
                         if (file.delete()) {
                             downloadFile(fileName, superPeerService, stub);
                         }
+
+                        endTime = System.currentTimeMillis();
+                        time = endTime - startTime;
+                        logPrint("Refreshing file [ " + fileName + " ] takes " + time + " ms.", true);
                     } else {
-                        System.out.println("Refreshing file does not exit. Please input again.");
+                        logPrint("Refreshing file does not exit. Please input again.", true);
                     }
                     break;
                 }
@@ -213,15 +251,19 @@ public class WeakPeerClient extends Thread {
                     (new LogUtil("SuperPeer")).print();
                     break;
                 case 10:
-                    (new LogUtil("SuperPeerServer")).print();
-                    break;
-                case 11:
                     (new LogUtil("WeakPeer")).print();
                     break;
-                case 12: {
+                case 11:
+                    (new LogUtil("Skeleton")).print();
+                    break;
+                case 12:
+                    (new LogUtil("Stub")).print();
+                    break;
+                case 13: {
                     System.out.println("Thanks for using the system.");
                     String[] splits = peerName.split("#V");
                     int weakPeerId = Integer.parseInt(splits[splits.length - 1]);
+                    logPrint(peerName + " exits the system ...", false);
                     superPeerService.unregisterPeer(superName, weakPeerId);
                     System.exit(0);
                     input.close();
@@ -305,7 +347,7 @@ public class WeakPeerClient extends Thread {
         int weakPeerId = Integer.parseInt(splits[splits.length - 1]);
         if (file.exists()) {
             Response cur = superPeerService.register(weakPeerId, peerLinkNodeList.get(0).getNodeName(), file);
-            System.out.println(cur);
+            System.out.println(cur.getMessage());
         } else {
             System.out.println("Downloaded file does not exit. Please download again.");
         }
@@ -320,7 +362,7 @@ public class WeakPeerClient extends Thread {
         @Override
         public void run() {
             RegistrationCenter registrationCenter = new RegistrationCenter();
-            Stub stub = new Stub(registrationCenter, log);
+            Stub stub = new Stub(registrationCenter);
             String superPeerName = peerLinkNodeList.get(0).getNodeName();
             SuperPeerService superPeerService = (SuperPeerService) stub.getStub(SuperPeerService.class, superPeerName);
 
@@ -337,6 +379,15 @@ public class WeakPeerClient extends Thread {
                     System.out.println("Please refresh the file [ " + file.getName() + " ]. You can choose '7' item.");
                 }
             }
+        }
+    }
+
+    private void logPrint(String message, boolean writeConsole) {
+        LogUtil log = new LogUtil("WeakPeer");
+        log.write(message);
+        log.close();
+        if (writeConsole) {
+            System.out.println(message);
         }
     }
 
