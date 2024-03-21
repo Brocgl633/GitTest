@@ -1,9 +1,8 @@
 package com.iit.cao.pa3.Server;
 
-import com.iit.cao.pa3.api.WeakPeerService;
 import com.iit.cao.pa3.api.SuperPeerService;
+import com.iit.cao.pa3.api.WeakPeerService;
 import com.iit.cao.pa3.pojo.Constants;
-import com.iit.cao.pa3.utils.LogUtil;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -14,8 +13,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ServerThread extends Thread {
-
-    private static final LogUtil log = new LogUtil("SuperPeerServer");
 
     private static final Map<String, Class<?>> SERVICE_MAP = new HashMap<>();
 
@@ -34,7 +31,6 @@ public class ServerThread extends Thread {
     }
 
     public void addServer() {
-        log.write(serverName + " starts to provide services in ip " + serverIP + " with port " + serverPort + " ...");
         if (serverName.startsWith("Super")) {
             SERVICE_MAP.put(SuperPeerService.class.getName(), SuperPeerServiceImpl.class);
         } else {
@@ -54,7 +50,7 @@ public class ServerThread extends Thread {
             serverSocket.setSoTimeout(Constants.SOCKET_SO_TIMEOUT);
             while (true) {
                 final Socket socket = serverSocket.accept();
-                newCachedThreadPool.execute(new Skeleton(socket, SERVICE_MAP, log));
+                newCachedThreadPool.execute(new Skeleton(socket, SERVICE_MAP));
             }
         } catch (IOException ex) {
             ex.printStackTrace();
