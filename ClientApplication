@@ -9,10 +9,28 @@ import java.util.List;
 import java.util.Scanner;
 
 public class ClientApplication {
-    private static final List<Node> leafNodes = new ArrayList<>();
+
+    private static final List<Node> weakPeerNodeList = new ArrayList<>();
+
+    public static void main(String[] args) throws InterruptedException {
+        Scanner input = new Scanner(System.in);
+        readConfig();
+        while (true) {
+            System.out.print("Choose one weak peer : ");
+            String leafNodeName = input.next();
+            for (Node node : weakPeerNodeList) {
+                if (node.getNodeName().equals(leafNodeName)) {
+                    WeakPeerClient client = new WeakPeerClient(node.getNodeName(), node.getLinkNodeList());
+                    System.out.println(client);
+                    client.start();
+                    client.join();
+                }
+            }
+        }
+    }
 
     private static void readConfig() {
-        for(int i = 1; i < 31; i++) {
+        for (int i = 1; i <= 27; i++) {
             Node weakPeerNode = new Node();
             String key = "WeakPeer#V" + i;
             String ip = (String) YamlUtil.getInstance().getValue(key, "ip");
@@ -25,24 +43,7 @@ public class ClientApplication {
             weakPeerNode.setNodeName(key);
             weakPeerNode.setServerPort(serverPort);
             weakPeerNode.setLinkNodeList(nodes);
-            leafNodes.add(weakPeerNode);
-        }
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        Scanner input = new Scanner(System.in);
-        readConfig();
-        while (true) {
-            System.out.println("choose the client: ");
-            String leafNodeName = input.next();
-            for (Node node : leafNodes) {
-                if(node.getNodeName().equals(leafNodeName)) {
-                    WeakPeerClient client = new WeakPeerClient(node.getNodeName(), node.getLinkNodeList());
-                    System.out.println(client);
-                    client.start();
-                    client.join();
-                }
-            }
+            weakPeerNodeList.add(weakPeerNode);
         }
     }
 }
