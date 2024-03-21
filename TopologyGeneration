@@ -1,7 +1,6 @@
 package com.iit.cao.pa3;
 
 import com.iit.cao.pa3.pojo.Node;
-import com.iit.cao.pa3.utils.FileUtil;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -12,6 +11,7 @@ import java.util.Scanner;
 
 import static java.lang.System.exit;
 
+import com.iit.cao.pa3.utils.FileUtil;
 import lombok.Data;
 
 @Data
@@ -31,17 +31,18 @@ public class TopologyGeneration {
     }
 
     public static void main(String[] args) throws IOException {
-        System.out.println("Please choose one topology you want to generate:");
+        System.out.println("Here are two topology types:");
         System.out.println("1: tree");
         System.out.println("2: all-to-all");
         System.out.println("3: exit");
-        TopologyGeneration topology = new TopologyGeneration(10, 3);
+        System.out.print("Please choose one topology you want to generate : ");
+        TopologyGeneration topology = new TopologyGeneration(9, 3);
         topology.generate();
         Scanner input = new Scanner(System.in);
         int option = input.nextInt();
         switch (option) {
             case 1:
-                topology.generateTreeTopology();
+                topology.generateTreeTopology(0);
                 generateYaml("tree", topology);
                 break;
             case 2:
@@ -59,7 +60,7 @@ public class TopologyGeneration {
     }
 
     private static void generateYaml(String topologyType, TopologyGeneration topology) throws IOException {
-        String path = "src/main/resources/" + topologyType + "Topology.yaml";
+        String path = "src/main/resources/topology.yaml";
         List<Node> nodeList = new ArrayList<>();
         nodeList.addAll(topology.getSuperPeerList());
         nodeList.addAll(topology.getWeakPeerList());
@@ -71,9 +72,9 @@ public class TopologyGeneration {
 
     public void generate() throws UnknownHostException {
         int superPeerServerPort = 60000;
-        int superPeerClientPort = 9000;
-        int wearPeerServerPort = 50000;
-        int wearPeerClientPort = 7000;
+        int superPeerClientPort = 7000;
+        int wearPeerServerPort = 65000;
+        int wearPeerClientPort = 7500;
         String ip = InetAddress.getLocalHost().getHostAddress();
         int weakPeerId = 1;
         for (int i = 1; i <= superPeerNum; i++) {
@@ -88,8 +89,20 @@ public class TopologyGeneration {
         }
     }
 
-    public void generateTreeTopology() {
-
+    public void generateTreeTopology(int x) {
+        Node parent = superPeerList.get(x);
+        if (x * 2 + 1 < superPeerList.size()) {
+            Node child1 = superPeerList.get(x * 2 + 1);
+            parent.getLinkNodeList().add(child1);
+            child1.getLinkNodeList().add(parent);
+            generateTreeTopology(x * 2 + 1);
+        }
+        if (x * 2 + 2 < superPeerList.size()) {
+            Node child2 = superPeerList.get(x * 2 + 2);
+            parent.getLinkNodeList().add(child2);
+            child2.getLinkNodeList().add(parent);
+            generateTreeTopology(x * 2 + 2);
+        }
     }
 
     public void generateAllToAllTopology() {
