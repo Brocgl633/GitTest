@@ -1,10 +1,10 @@
 package com.iit.cao.pa3.utils;
 
 import com.iit.cao.pa3.pojo.Node;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class YamlUtil {
             jdbcProperties = new HashMap<>();
             Yaml yaml = new Yaml();
             Yaml yamlJdbc = new Yaml();
-            in = YamlUtil.class.getClassLoader().getResourceAsStream("allToAllTopology.yaml");
+            in = YamlUtil.class.getClassLoader().getResourceAsStream("topology.yaml");
             inJdbc = YamlUtil.class.getClassLoader().getResourceAsStream("application.yaml");
             properties = yaml.loadAs(in, HashMap.class);
             jdbcProperties = yamlJdbc.loadAs(inJdbc, HashMap.class);
