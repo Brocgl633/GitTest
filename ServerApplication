@@ -9,10 +9,21 @@ import java.util.List;
 
 public class ServerApplication {
 
-    private static final List<Node> superPeers = new ArrayList<>();
+    private static final List<Node> superPeerNodeList = new ArrayList<>();
+
+    public static void main(String[] args) {
+        readConfig();
+        for (Node node : superPeerNodeList) {
+            ServerThread server = new ServerThread(node.getNodeName(), node.getIp(), node.getServerPort());
+            System.out.println(node.getNodeName() + " inserted into database ...");
+            server.addServer();
+            System.out.println(node.getNodeName() + " continues to provide services ...");
+            server.start();
+        }
+    }
 
     public static void readConfig() {
-        for(int i = 1; i < 11; i++) {
+        for (int i = 1; i <= 9; i++) {
             Node superPeerNode = new Node();
             String key = "SuperPeer#V" + i;
             String ip = (String) YamlUtil.getInstance().getValue(key, "ip");
@@ -25,19 +36,8 @@ public class ServerApplication {
             superPeerNode.setNodeName(key);
             superPeerNode.setServerPort(serverPort);
             superPeerNode.setLinkNodeList(nodes);
-            superPeers.add(superPeerNode);
+            superPeerNodeList.add(superPeerNode);
         }
-    }
 
-    public static void main(String[] args) {
-        readConfig();
-        for(Node node: superPeers) {
-            ServerThread server = new ServerThread(node.getNodeName(), node.getIp(), node.getServerPort());
-            System.out.println(node.getNodeName() + " inserted into database ...");
-            server.addServer();
-            System.out.println(node.getNodeName() + " continues to provide services ...");
-            server.start();
-        }
     }
-
 }
