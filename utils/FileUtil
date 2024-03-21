@@ -18,7 +18,7 @@ public class FileUtil {
             if (!file.exists()) {
                 file.mkdirs();
             }
-            for (int i = 1; i < 11; i++) {
+            for (int i = 1; i <= 3; i++) {
                 File file2 = new File(dir, node.getNodeName() + "#V" + i + ".txt");
                 if (!file2.exists()) {
                     file2.createNewFile();
