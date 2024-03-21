@@ -2,30 +2,18 @@ package com.iit.cao.pa3.Server;
 
 import com.iit.cao.pa3.database.bean.Peer;
 import com.iit.cao.pa3.database.dao.PeerDao;
-import com.iit.cao.pa3.database.Impl.PeerDaoImpl;
-import com.iit.cao.pa3.pojo.Constants;
+import com.iit.cao.pa3.database.impl.PeerDaoImpl;
+import com.iit.cao.pa3.pojo.*;
 import com.iit.cao.pa3.utils.JdbcUtil;
 import com.iit.cao.pa3.api.SuperPeerService;
-import com.iit.cao.pa3.pojo.Node;
-import com.iit.cao.pa3.pojo.UpdateMessage;
-import com.iit.cao.pa3.pojo.Message;
-import com.iit.cao.pa3.pojo.Response;
 import com.iit.cao.pa3.utils.LogUtil;
 import com.iit.cao.pa3.utils.YamlUtil;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.util.*;
 
 public class SuperPeerServiceImpl implements SuperPeerService {
-
-    private static final LogUtil log = new LogUtil("SuperPeer");
 
     private static final PeerDao dao = new PeerDaoImpl();
 
@@ -38,23 +26,14 @@ public class SuperPeerServiceImpl implements SuperPeerService {
         modifiedFileMsgMap = new HashMap<>();
     }
 
-    private String getFileMd5(String fileName) throws IOException, NoSuchAlgorithmException {
-        InputStream is = Files.newInputStream(Paths.get(fileName));
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        md.update(Files.readAllBytes(Paths.get(fileName)));
-        byte[] digest = md.digest();
-        String fileChecksum = Base64.getEncoder().encodeToString(digest);
-        return fileChecksum;
-    }
-
     @Override
     public Response register(Integer peerId, String serverName, File file) {
         Connection conn = null;
         try {
             conn = JdbcUtil.getConnection();
 
-            log.write(serverName + " receives the register request ...");
-            log.write("Register file ===> " + file);
+            logPrint(serverName + " receives the register request ...");
+            logPrint("Register file ===> " + file);
 
             String lifeCycle = Constants.LIFE_CYCLE_TYPE_UNEXPIRED;
             String fileType;
@@ -78,7 +57,7 @@ public class SuperPeerServiceImpl implements SuperPeerService {
                 newPeer.setType(fileType);
                 newPeer.setState(Constants.PEER_STATE_VALID);
                 dao.insert(conn, newPeer);
-                log.write("File [ " + file.getName() + " ] is the first registration ...");
+                logPrint("File [ " + file.getName() + " ] is the first registration ...");
             } else if (originalPeer.getFileSize() != file.length()) {
                 Integer versionId = originalPeer.getVersion() + 1;
                 newPeer.setVersion(versionId);
@@ -88,7 +67,7 @@ public class SuperPeerServiceImpl implements SuperPeerService {
                 dao.insert(conn, newPeer);
                 originalPeer.setState(Constants.PEER_STATE_INVALID);
                 dao.update(conn, originalPeer);
-                log.write("New file [ " + file.getName() + " ] has registered and updated the original file ...");
+                logPrint("New file [ " + file.getName() + " ] has registered and updated the original file ...");
             }
             return new Response(200, "File [ " + file.getName() + " ] registered successfully.");
         } catch (Exception ex) {
@@ -105,13 +84,13 @@ public class SuperPeerServiceImpl implements SuperPeerService {
         try {
             conn = JdbcUtil.getConnection();
 
-            log.write(serverName + " receives the batch registration request ...");
+            logPrint(serverName + " receives the batch registration request ...");
 
             String fileType = Constants.FILE_TYPE_COPY;
             String lifeCycle = Constants.LIFE_CYCLE_TYPE_EXPIRED;
             for (File file : lists) {
 
-                log.write("Register file ===> " + file);
+                logPrint("Register file ===> " + file);
 
                 if (file.canRead() && file.canWrite()) {
                     fileType = Constants.FILE_TYPE_MASTER;
@@ -132,7 +111,7 @@ public class SuperPeerServiceImpl implements SuperPeerService {
                     newPeer.setType(fileType);
                     newPeer.setState(Constants.PEER_STATE_VALID);
                     dao.insert(conn, newPeer);
-                    log.write("File [ " + file.getName() + " ] is the first registration ...");
+                    logPrint("File [ " + file.getName() + " ] is the first registration ...");
                 } else if (originalPeer.getFileSize() != file.length()) {
                     Integer versionId = originalPeer.getVersion() + 1;
                     newPeer.setVersion(versionId);
@@ -142,10 +121,10 @@ public class SuperPeerServiceImpl implements SuperPeerService {
                     originalPeer.setState(Constants.PEER_STATE_INVALID);
                     dao.update(conn, originalPeer);
                     dao.insert(conn, newPeer);
-                    log.write("New file [ " + file.getName() + " ] has registered and updated the original file ...");
+                    logPrint("New file [ " + file.getName() + " ] has registered and updated the original file ...");
                 }
             }
-            return new Response(200, "All files registered successfully.");
+            return new Response(200, lists.size() + " files registered successfully.");
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
@@ -161,11 +140,11 @@ public class SuperPeerServiceImpl implements SuperPeerService {
         try {
             conn = JdbcUtil.getConnection();
 
-            log.write("Remote server object receives the unregister request ...");
+            logPrint("Remote server object receives the unregister request ...");
 
             List<Peer> lists = dao.getPeerByPeerIdAndFileName(conn, peerId, fileName);
             if (lists.isEmpty()) {
-                log.write("File [ " + fileName + "] doesn't exist!");
+                logPrint("File [ " + fileName + "] doesn't exist!");
                 return new Response(401, "File [ " + fileName + "] doesn't exist!");
             }
 
@@ -180,7 +159,7 @@ public class SuperPeerServiceImpl implements SuperPeerService {
                     dao.deleteById(conn, peer.getId());
                 }
             }
-            log.write("File [ " + fileName + " ] unregistered successfully.");
+            logPrint("File [ " + fileName + " ] unregistered successfully.");
             return new Response(200, "File [ " + fileName + " ] unregistered successfully.", versionId);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -191,47 +170,32 @@ public class SuperPeerServiceImpl implements SuperPeerService {
         return new Response(401, "There are some errors in deregistration ...");
     }
 
-    private void deleteFileInSameVersion(String serverName, String fileName, Integer version, Integer peerId) {
+    @Override
+    public Response displayRegisteredFiles(Integer peerId, String serverName) {
         Connection conn = null;
         try {
             conn = JdbcUtil.getConnection();
-            List<Peer> lists = dao.getPeerListInSameVersion(conn, peerId, serverName, fileName, version);
-            if (lists.isEmpty()) {
-                log.write("File [ " + fileName + " ] failed to deregister. It doesn't exist!");
-                return;
-            }
-
-            log.write("Update message with file [ " + fileName + " ] hitting in " + serverName + " !!!");
-            for (Peer peer : lists) {
-                dao.deleteById(conn, peer.getId());
-            }
+            logPrint(serverName + " receives the query registration files request ...");
+            List<Peer> registrationFiles = dao.getAllRegistrationFiles(conn, peerId, serverName);
+            logPrint("All registration files ===> " + registrationFiles);
+            return new Response(200, "Search registration files successfully.", registrationFiles);
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
             JdbcUtil.closeResource(conn, null, null);
         }
-    }
 
-    public List<Peer> getPeerContainFile(String serverName, String fileName) {
-        Connection conn = null;
-        List<Peer> nodeList = null;
-        try {
-            conn = JdbcUtil.getConnection();
-            nodeList = dao.getPeerByFileNameAndSeverName(conn, serverName, fileName);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        } finally {
-            JdbcUtil.closeResource(conn, null, null);
-        }
-        return nodeList;
+        return new Response(401, "There are some errors in get registration files ...");
     }
 
     @Override
     public List<Peer> queryFile(Message message) {
+        logPrint("Remote server object receives the query file message request ...");
         List<Peer> res = new ArrayList<>();
         Queue<Message> queue = new ArrayDeque<>();
         queue.offer(message);
 
+        logPrint("During the query file :");
         while (!queue.isEmpty()) {
             int size = queue.size();
             for (int i = 0; i < size; i++) {
@@ -257,10 +221,12 @@ public class SuperPeerServiceImpl implements SuperPeerService {
                     } else {
                         nodeNameMsgMap.put(neighborNodeName, curMap);
                     }
+
+                    logPrint(neighbor + " receives the message ...");
                     List<Peer> result = getPeerContainFile(neighborNodeName, fileName);
                     res.addAll(result);
 
-                    // 刷新 ttl
+                    // refresh ttl
                     if (curTtl != 0) {
                         Message newMsg = new Message(nodeName, fileName, sequenceNum, messageId, null);
                         newMsg.setTtl((byte) (curTtl - 1));
@@ -272,16 +238,17 @@ public class SuperPeerServiceImpl implements SuperPeerService {
                 }
             }
         }
+        logPrint("These peers contain the target file ===> " + res);
         return res;
     }
 
     @Override
     public void broadcastUpdateMsg(UpdateMessage message) {
-        log.write("Remote server object receives the broadcast update file message request ...");
+        logPrint("Remote server object receives the broadcast update file message request ...");
         Queue<UpdateMessage> queue = new ArrayDeque<>();
         queue.add(message);
 
-        log.write("During the update broadcast :");
+        logPrint("During the update broadcast :");
         while (!queue.isEmpty()) {
             int size = queue.size();
             for (int i = 0; i < size; i++) {
@@ -302,7 +269,7 @@ public class SuperPeerServiceImpl implements SuperPeerService {
                         modifiedFileMsgMap.put(neighborNodeName, curMap);
                     }
 
-                    log.write(neighbor + " receives the message ...");
+                    logPrint(neighbor + " receives the message ...");
 
                     String[] splits = neighborNodeName.split("#V");
                     int superPeerId = Integer.parseInt(splits[splits.length - 1]);
@@ -313,7 +280,6 @@ public class SuperPeerServiceImpl implements SuperPeerService {
                     }
 
                     // delete modified file with the same file name and versionId
-                    log.write("Delete modified file with the same file name and versionId.");
                     for (String name : WeakNodes) {
                         String[] curSplit = name.split("#V");
                         Integer weakPeerId = Integer.parseInt(curSplit[curSplit.length - 1]);
@@ -334,7 +300,6 @@ public class SuperPeerServiceImpl implements SuperPeerService {
                     }
 
                     // delete modified file in local directory
-                    log.write("Delete modified file in local directory.");
                     for (String weakNodeName : WeakNodes) {
                         String path = "src/dir/" + weakNodeName;
                         File file = new File(path);
@@ -379,9 +344,12 @@ public class SuperPeerServiceImpl implements SuperPeerService {
         return new Response(200, "Fresh copy-files successfully !!!", invalidCount);
     }
 
-
     @Override
     public Response unregisterPeer(String serverName, Integer peerId) {
+
+        logPrint(serverName + " receives the unregister peer request ...");
+        logPrint("Unregister peer [ WeakPeer#V" + peerId + " ]");
+
         Connection conn = null;
         try {
             conn = JdbcUtil.getConnection();
@@ -390,8 +358,44 @@ public class SuperPeerServiceImpl implements SuperPeerService {
         }
 
         dao.deleteByServerNameAndPeerId(conn, serverName, peerId);
+        logPrint("Delete weak peer [ WeakPeer#V" + peerId + " ] successfully !!!");
 
         return new Response(200, "Delete weak peer [ WeakPeer#V" + peerId + " ] successfully !!!");
+    }
+
+    private void deleteFileInSameVersion(String serverName, String fileName, Integer version, Integer peerId) {
+        Connection conn = null;
+        try {
+            conn = JdbcUtil.getConnection();
+            List<Peer> lists = dao.getPeerListInSameVersion(conn, peerId, serverName, fileName, version);
+            if (lists.isEmpty()) {
+                logPrint("File [ " + fileName + " ] failed to deregister. It doesn't exist!");
+                return;
+            }
+
+            logPrint("Update message with file [ " + fileName + " ] hitting in " + serverName + " !!!");
+            for (Peer peer : lists) {
+                dao.deleteById(conn, peer.getId());
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            JdbcUtil.closeResource(conn, null, null);
+        }
+    }
+
+    public List<Peer> getPeerContainFile(String serverName, String fileName) {
+        Connection conn = null;
+        List<Peer> nodeList = null;
+        try {
+            conn = JdbcUtil.getConnection();
+            nodeList = dao.getPeerByFileNameAndSeverName(conn, serverName, fileName);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            JdbcUtil.closeResource(conn, null, null);
+        }
+        return nodeList;
     }
 
     private void deleteLocalFile(File file, String fileName, String weakNodeName) {
@@ -402,9 +406,16 @@ public class SuperPeerServiceImpl implements SuperPeerService {
             }
         } else {
             if (file.getName().equals(fileName)) {
-                log.write("Update message hits the local file [ " + fileName + " ] in " + weakNodeName + " ...");
+                logPrint("Update message hits the local file [ " + fileName + " ] in " + weakNodeName + " ...");
                 file.delete();
             }
         }
+    }
+
+    private void logPrint(String message) {
+        LogUtil log = new LogUtil("SuperPeer");
+        log.write(message);
+        log.close();
+        System.out.println(message);
     }
 }
