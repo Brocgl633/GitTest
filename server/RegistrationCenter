@@ -1,8 +1,8 @@
 package com.iit.cao.pa3.Server;
 
-import com.iit.cao.pa3.db.bean.Server;
-import com.iit.cao.pa3.db.dao.ServerDao;
-import com.iit.cao.pa3.db.Impl.ServerDaoImpl;
+import com.iit.cao.pa3.database.bean.Server;
+import com.iit.cao.pa3.database.dao.ServerDao;
+import com.iit.cao.pa3.database.impl.ServerDaoImpl;
 import com.iit.cao.pa3.utils.JdbcUtil;
 
 import java.sql.Connection;
@@ -11,6 +11,14 @@ public class RegistrationCenter {
 
     private final ServerDao dao = new ServerDaoImpl();
 
+    /**
+     * 注册服务，即将服务的相关信息插入server表中
+     * @param serverName
+     * @param serverIp
+     * @param serverPort
+     * @param status
+     * @param service
+     */
     public void registerServer(String serverName, String serverIp, Integer serverPort, String status, String service) {
         Connection conn = null;
         try {
