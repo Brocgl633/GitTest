@@ -63,3 +63,36 @@ InvalidationMessage：
 Invocation：
 这个类作为远程调用之间的消息传递的载体，封装了代理对象名称、方法名、调用方法的入参以及这些参数的类型。调用方封装好后发送给代理对象，代理对象解析参数后调用对应的方法，并将执行结果返回给调用方。
 
+
+
+
+
+
+meta events
+Activate()
+Start()
+Paycredit()
+Paycash()
+Approved()
+Ceject()
+Cancel()
+StartPump()
+StopPump()
+BelowCurrentPrice()
+AboveCurrentPrice()
+SelectGas()
+Receipt()
+NoReceipt()
+
+meta actions
+StoreData()
+PayMsg()
+RejectMsg()
+CancelMsg()
+EjectCard()
+DisplayMenu()
+StoreCash()
+StorePrice()
+StorePumpData()
+PrintReceipt()
+ReturnCash()
