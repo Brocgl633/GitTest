@@ -1,0 +1,70 @@
+int Rprice
+int Pprice
+int Dprice
+int cash
+int G
+int total
+int temp_a
+int temp_b
+int temp_c
+
+Operations of Input Processor of GP-2
+Activate (float a, float b, float c)  {
+  if (a > 0 && b > 0 && c > 0) {
+    temp_a = a;  
+    temp_b = b;  
+    temp_c = c;  
+    m->Activate();
+  }
+}
+
+Start() {
+  m->Start();
+}
+
+PayCash(int c) {
+  if (c > 0) {
+    d->temp_c = c;
+	m->PayCash();
+  }
+}
+
+Cancel() {
+  m->Cancel();
+}
+
+Premiun() {
+  m-SelectGas(3);
+}
+
+Regular() {
+  m-SelectGas(1);
+}
+
+Diesel() {
+  m-SelectGas(2);
+}
+
+StartPump() {
+  m->StartPump()
+}
+
+Pump() {
+  if (d->cash < d->price * (d->L + 1)) {
+    m->StopPump();
+  } else {
+    m->Pump();
+  }
+}
+
+StopPump() {
+  m->StopPump();
+}
+
+Receipt(){
+  m->Receipt();
+}
+
+NoReceipt(){
+  m->NoReceipt();
+}
