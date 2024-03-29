@@ -6,10 +6,9 @@ PayCash()
 Approved()
 Reject()
 Cancel()
+Pump()
 StartPump()
 StopPump()
-BelowCurrentPrice()
-AboveCurrentPrice()
 SelectGas()
 Receipt()
 NoReceipt()
@@ -19,9 +18,20 @@ NoReceipt()
 A list of meta actions for the MDA-EFSM:
 StoreData()			// store the price of the gas per liter from temporary data store to price in data store
 PayMsg()				// display payment method information
-ejectMsg()			// display information about refusing to pay with credit
-CancelMsg()			// display cancellation message with two payment methods
+RejectMsg()			// display information about refusing to pay with credit
 EjectCard()			// unable to pay with credit
+CancelMsg()			// display cancellation message with two payment methods
+StoreCash() 		// store the cash from temporary data store to cash in data store
 DisplayMenu()			// display a menu with a list of transactions
+StorePrice()		// store the unit final price of specific gas type from temporary data store to price in data store
+SetInitialValue()	// initialize the variable liter and total price
+StopMsg()			// display stop message
 PrintReceipt()			// print transaction invoice information
 ReturnCash()			// return remaining amount
+
+
+
+
+
+
+
