@@ -1,0 +1,58 @@
+int price
+int cash
+int L
+int total
+int w
+int temp_a
+int temp_c
+
+Operations of Input Processor of GP-1
+Activate(int a) {
+  if (a > 0) {
+    temp_a = a;  
+    m->Activate();
+  }
+}
+
+Start() {
+  m->Start();
+}
+
+PayCredit() {
+  m->PayCredit();
+}
+
+Reject() {
+  m->Reject();
+}
+
+Cancel() {
+  m->Cancel();
+}
+
+Approved() {
+  m->Approved();
+}
+
+PayCash(int c) {
+  if (c > 0) {
+    d->temp_c = c;
+	m->PayCash();
+  }
+}
+
+StartPump() {
+  m->StartPump()
+}
+
+Pump() {
+  if (d->w == 0 && d->cash < d->price * (d->L + 1)) {
+    m->StopPump();
+  } else if ((d->w == 0 || d-w == 1) && d->cash >= d->price * (d->L + 1)) {
+    m->Pump();
+  }
+}
+
+StopPump() {
+  m->StopPump();
+}
