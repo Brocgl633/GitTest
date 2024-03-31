@@ -1,13 +1,72 @@
-10.
-In a distributed system, atomic messages are logically inseparable units for sending and receiving messages. Its purpose is to ensure that communication operations in a distributed environment are atomic, that is, messages are either delivered and received completely or not delivered and received completely without partial delivery.
-The purpose of atomic messages is as follows:
-1. Consistency: Atomic messages ensure that communication operations in a distributed system are atomic, thus ensuring system consistency. During message delivery, if a message is lost or partially delivered between sending and receiving, it can cause an error or inconsistent state of the system. By using atomic messages, this situation can be avoided and the correctness and consistency of the system can be maintained.
-2. Simplified programming model: Atomic messages simplify the programming model of distributed systems, so that developers can design and program systems more conveniently. Developers can assume that message delivery operations are atomic without considering possible partial delivery or loss during message delivery, thus simplifying system design and programming.
+import java.io.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-11.
-In the RPC system, the common five types of faults are as follows:
-1. Communication fault: This type of fault refers to the problem that occurs during network communication, such as message loss, delay, or disorder. Solutions include using a reliable transport protocol (such as TCP), implementing a timeout retransmission mechanism, and using a message acknowledgment mechanism to ensure reliable delivery of messages.
-2. Server failure: When the remote server is faulty or unavailable, the RPC call fails. Solutions include implementing redundant backups of servers, distributing requests to available servers through load balancing, and implementing failover mechanisms to automatically switch over to backup servers.
-3. Client fault: The client may be faulty due to various reasons, such as program errors, resource exhaustion, or network disconnection. The solution includes implementing the robustness design of the client, such as implementing the retry mechanism, fault tolerance mechanism, and monitoring and managing the running status of the client.
-4. Concurrent faults: When multiple clients initiate RPC calls at the same time, concurrent conflicts or competition conditions may occur, resulting in data inconsistency or deadlock. Solutions include using transactional operations to ensure consistency, implementing concurrency control mechanisms such as locks or semaphores, and designing appropriate concurrency models to avoid race conditions.
-5. Data transmission failure: RPC invoking may involve data transmission and processing. Therefore, errors or data damage may occur during data transmission. Solutions include implementing integrity checks and verification of data, such as using checksums or message authentication codes (MACs), and implementing encryption and decryption mechanisms to protect data security.
+class Peer {
+    private String peerName;
+
+    public Peer(String name) {
+        this.peerName = name;
+    }
+
+    public void uploadFilePart(File filePart) {
+        // 实现文件上传逻辑
+        System.out.println("Uploading file part to Peer: " + peerName);
+    }
+
+    public void downloadFilePart(File filePart) {
+        // 实现文件下载逻辑
+        System.out.println("Downloading file part from Peer: " + peerName);
+    }
+}
+
+public class P2PFileSharingSystem {
+    public static void main(String[] args) {
+        // 假设已经有4个 Peer
+        Peer[] peers = new Peer[4];
+        peers[0] = new Peer("Peer1");
+        peers[1] = new Peer("Peer2");
+        peers[2] = new Peer("Peer3");
+        peers[3] = new Peer("Peer4");
+
+        // 上传文件到4个 Peer
+        File file = new File("example.txt");
+        File[] fileParts = splitFile(file, peers.length);
+        for (int i = 0; i < peers.length; i++) {
+            peers[i].uploadFilePart(fileParts[i]);
+        }
+
+        // 使用线程池并行下载文件部分
+        ExecutorService executor = Executors.newFixedThreadPool(peers.length);
+        for (int i = 0; i < peers.length; i++) {
+            int partNumber = i; // 部分编号从0开始
+            executor.submit(() -> {
+                peers[partNumber].downloadFilePart(fileParts[partNumber]);
+            });
+        }
+
+        // 关闭线程池
+        executor.shutdown();
+    }
+
+    // 将文件分成指定数量的部分
+    private static File[] splitFile(File file, int parts) {
+        long fileSize = file.length();
+        long partSize = fileSize / parts;
+        File[] fileParts = new File[parts];
+        try (FileInputStream fis = new FileInputStream(file)) {
+            for (int i = 0; i < parts; i++) {
+                String partFileName = file.getName() + ".part" + i;
+                fileParts[i] = new File(partFileName);
+                try (FileOutputStream fos = new FileOutputStream(fileParts[i])) {
+                    byte[] buffer = new byte[(int) partSize];
+                    int bytesRead = fis.read(buffer);
+                    fos.write(buffer, 0, bytesRead);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return fileParts;
+    }
+}
