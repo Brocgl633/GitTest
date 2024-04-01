@@ -131,10 +131,10 @@ public class PeerNode_1 {
 
                                 clientRequest = new Request();
                                 clientRequest.setRequestType("REGISTER");
-                                Object[] data = new Object[2];
-//                                data[0] = files;
-                                data[0] = fileObjList;
+                                Object[] data = new Object[3];
+                                data[0] = files;
                                 data[1] = regDirPathList;
+                                data[2] = fileObjList;
                                 clientRequest.setRequestData(data);
                                 out.writeObject(clientRequest);
 
@@ -209,9 +209,18 @@ public class PeerNode_1 {
 
                                     System.out.print("Input the start offset : ");
                                     int startOffset = Integer.parseInt(input.readLine());
-                                    System.out.print("Input the end offset : ");
-                                    int endOffset = Integer.parseInt(input.readLine());
-                                    downloadFile(clientIp, fileName, out, in, startOffset, endOffset);
+                                    System.out.print("Input the chuck size : ");
+                                    int chuckSize = Integer.parseInt(input.readLine());
+                                    /**
+                                     *
+                                     */
+                                    clientRequest = new Request();
+                                    clientRequest.setRequestType("UPDATE_SPLIT_FILE");
+                                    clientRequest.setRequestData(clientIp);
+                                    out.writeObject(clientRequest);
+
+                                    downloadFile(clientIp, fileName, out, in, startOffset, chuckSize);
+
                                     System.out.println(
                                             "The file has downloaded in the current path's sub-directory '/downloads'.");
                                     if (dOrP.equalsIgnoreCase("P")) {
@@ -231,11 +240,20 @@ public class PeerNode_1 {
                                                     .next();
                                             clientIp = entry.getValue();
                                         }
+
                                         System.out.print("Input the start offset : ");
                                         int startOffset = Integer.parseInt(input.readLine());
-                                        System.out.print("Input the end offset : ");
-                                        int endOffset = Integer.parseInt(input.readLine());
-                                        downloadFile(clientIp, fileName, out, in, startOffset, endOffset);
+                                        System.out.print("Input the chuck size : ");
+                                        int chuckSize = Integer.parseInt(input.readLine());
+                                        /**
+                                         *
+                                         */
+                                        clientRequest = new Request();
+                                        clientRequest.setRequestType("UPDATE_SPLIT_FILE");
+                                        clientRequest.setRequestData(clientIp);
+                                        out.writeObject(clientRequest);
+
+                                        downloadFile(clientIp, fileName, out, in, startOffset, chuckSize);
                                     }
                                 }
                             } else {
@@ -359,15 +377,15 @@ public class PeerNode_1 {
         }
 
         private void downloadFile(String ip,
-                String fileName,
-                ObjectOutputStream out,
-                ObjectInputStream in,
-                int startOffset,
-                int endOffset) {
+                                  String fileName,
+                                  ObjectOutputStream out,
+                                  ObjectInputStream in,
+                                  int startOffset,
+                                  int chuckSize) {
             boolean isDownloaded = false;
             long startTime = System.currentTimeMillis();
 
-            if (!FileUtil.downloadFile(ip, SERVER_SOCKET_PORT_1, fileName, regDirPathList)) {
+            if (!FileUtil.downloadPartFile(ip, SERVER_SOCKET_PORT_1, fileName, startOffset, chuckSize)) {
                 try {
                     Request peerRequest = new Request();
                     peerRequest.setRequestType("GET_BACKUP_NODES");
@@ -378,7 +396,7 @@ public class PeerNode_1 {
                     List<String> backupClientIpList = (List<String>) serverResponse.getResponseData();
 
                     for (String backupIp : backupClientIpList) {
-                        if (FileUtil.downloadFile(backupIp, SERVER_SOCKET_PORT_1, fileName, regDirPathList)) {
+                        if (FileUtil.downloadPartFile(backupIp, SERVER_SOCKET_PORT_1, fileName, startOffset, chuckSize)) {
                             isDownloaded = true;
                             break;
                         }
@@ -402,6 +420,8 @@ public class PeerNode_1 {
     }
 
     private static class Server extends Thread {
+        private Map<String, Map<File, byte[]>> fileSplitRegMap;
+
         private Socket socket;
 
         private LogUtil log = new LogUtil("PeerNode");
@@ -411,11 +431,10 @@ public class PeerNode_1 {
         }
 
         public void run() {
-//            OutputStream out = null;
+            OutputStream out = null;
             ObjectInputStream in = null;
+            ObjectOutputStream oOut = null;
             BufferedInputStream fileInput = null;
-
-            ObjectOutputStream out = null;
 
             try {
                 String clientIp = socket.getInetAddress().getHostAddress();
@@ -424,24 +443,24 @@ public class PeerNode_1 {
 
                 if (request.getRequestType().equalsIgnoreCase("DOWNLOAD")) {
                     logPrint("Serving DOWNLOAD request for " + clientIp);
-//                    Object[] data = (Object[]) request.getRequestData();
-//                    String fileName = (String) data[0];
-//                    List<String> regDirPathList = (List<String>) data[1];
-//                    String fileDirPath = FileUtil.getFileLocation(fileName, regDirPathList);
-//                    File file = new File(fileDirPath + fileName);
-//                    logPrint("Downloading file: " + fileDirPath + fileName);
-//                    byte[] mybytearray = new byte[(int) file.length()];
-//                    fileInput = new BufferedInputStream(new FileInputStream(file));
-//                    fileInput.read(mybytearray, 0, mybytearray.length);
-//                    System.out.println("Downloading file byteArray: " + mybytearray.length + " bytes.");
-//                    out = socket.getOutputStream();
-//                    out.write(mybytearray, 0, mybytearray.length);
-//                    out.flush();
-//                    logPrint("File sent successfully.");
-
-
+                    logPrint("***** : 1");
+                    String fileName = (String) request.getRequestData();
+                    logPrint("***** : 1");
+                    oOut = new ObjectOutputStream(socket.getOutputStream());
+                    logPrint("***** : 1");
+                    Response response = new Response();
+                    logPrint("***** : " + fileSplitRegMap.get(fileName));
+                    response.setResponseData(fileSplitRegMap.get(fileName));
+                    oOut.writeObject(response);
+                    logPrint("File part information map sent successfully.");
                     System.out.println();
-                } else if (request.getRequestType().equalsIgnoreCase("UPDATE_BACKUP_DATA")) {
+                } else if (request.getRequestType().equalsIgnoreCase("UPDATE_FILE_PART")) {
+                    logPrint("Serving UPDATE_FILE_PART request for " + clientIp);
+                    logPrint("UPDATE_FILE_PART start ...");
+                    fileSplitRegMap = (Map<String, Map<File, byte[]>>) request.getRequestData();
+                    logPrint("UPDATE_FILE_PART update the file part information : " + fileSplitRegMap);
+                    System.out.println();
+                }  else if (request.getRequestType().equalsIgnoreCase("UPDATE_BACKUP_DATA")) {
                     logPrint("Serving UPDATE_BACKUP_DATA request for " + clientIp);
                     logPrint("UPDATE_BACKUP_DATA start ...");
                     Object[] data = (Object[]) request.getRequestData();
@@ -469,6 +488,9 @@ public class PeerNode_1 {
                     }
                     if (in != null) {
                         in.close();
+                    }
+                    if (oOut != null) {
+                        oOut.close();
                     }
                     if (fileInput != null) {
                         fileInput.close();
