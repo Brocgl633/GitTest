@@ -9,7 +9,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class CentralIndexingServerNode {
 
@@ -58,7 +57,7 @@ public class CentralIndexingServerNode {
     /**
      *
      */
-    private static Map<String, TreeMap<File, byte[]>> fileSplitRegMap = new HashMap<>();
+    private static Map<String, Map<File, byte[]>> fileSplitRegMap = new HashMap<>();
 
 
 
@@ -110,7 +109,7 @@ public class CentralIndexingServerNode {
 
                 Response response = new Response();
                 response.setResponseCode(200);
-                response.setResponseData("Set Peer node id [ " + peerNumber + " ] as a backup node? (Y/N):");
+                response.setResponseData("Set Peer node id [ " + peerNumber + " ] as a backup node? (Y/N) : ");
                 out.writeObject(response);
 
                 Request clientRequest = (Request) in.readObject();
@@ -151,15 +150,14 @@ public class CentralIndexingServerNode {
                     if (requestType.equalsIgnoreCase("REGISTER")) {
                         logPrint("Start registering a file ...");
                         Object[] data = (Object[]) clientRequest.getRequestData();
-//                        ArrayList<String> registerFileList = (ArrayList<String>) data[0];
-                        List<File> fileObjList = (List<File>) data[0];
+                        ArrayList<String> registerFileList = (ArrayList<String>) data[0];
                         List<String> regDirPathList = (List<String>) data[1];
-//                        ArrayList<String> fileList = register(clientIp, registerFileList, regDirPathList);
+                        List<File> fileObjList = (List<File>) data[2];
+                        ArrayList<String> fileList = register(clientIp, registerFileList, regDirPathList);
                         registerSplitFile(fileObjList);
                         response = new Response();
                         response.setResponseCode(200);
-//                        response.setResponseData(fileList);
-//                        response.setResponseData();
+                        response.setResponseData(fileList);
                         out.writeObject(response);
                     } else if (requestType.equalsIgnoreCase("SEARCH")) {
                         logPrint("Start searching a file ...");
@@ -214,13 +212,11 @@ public class CentralIndexingServerNode {
                             response.setResponseData("Error in unregistering files from ip [ " + clientIp + " ].");
                         }
                         out.writeObject(response);
-                    } else if (requestType.equalsIgnoreCase("DOWNLOAD")) {
-                        System.out.println("Start transfer the part file information ...");
-                        response = new Response();
-                        response.setResponseCode(200);
-                        response.setResponseData(fileSplitRegMap);
-                        out.writeObject(response);
-                        System.out.println("Backup nodes information sent.");
+                    } else if (requestType.equalsIgnoreCase("UPDATE_SPLIT_FILE")) {
+                        System.out.println("Start transfer the part file information to Server...");
+                        String serverIp = (String) clientRequest.getRequestData();
+                        sendPartFileInfo(serverIp);
+                        System.out.println("Part file nodes information sent.");
                     }  else if (requestType.equalsIgnoreCase("GET_BACKUP_NODES")) {
                         System.out.println("Start getting backup nodes information ...");
                         response = new Response();
@@ -255,6 +251,29 @@ public class CentralIndexingServerNode {
             } catch (Exception e) {
                 logPrint("Error handling client id [ " + peerNumber + " ]: " + e);
                 Thread.currentThread().interrupt();
+            }
+        }
+
+        private void sendPartFileInfo(String serverIp) throws IOException {
+            ObjectOutputStream out = null;
+            Socket socket = null;
+            try {
+                socket = new Socket(serverIp, SERVER_SOCKET_PORT_1);
+                out = new ObjectOutputStream(socket.getOutputStream());
+                Request request = new Request();
+                request.setRequestType("UPDATE_FILE_PART");
+                request.setRequestData(fileSplitRegMap);
+                out.writeObject(request);
+                logPrint("fileSplitRegMap : " + fileSplitRegMap);
+            } catch (IOException ex) {
+                logPrint("Error in send part file information :" + ex);
+            } finally {
+                if (out != null) {
+                    out.close();
+                }
+                if (socket != null && socket.isConnected()) {
+                    socket.close();
+                }
             }
         }
 
@@ -456,8 +475,8 @@ public class CentralIndexingServerNode {
                     socket.close();
                 }
                 socket = null;
-            } catch (Exception e) {
-                logPrint("Error in back up:" + e);
+            } catch (Exception ex) {
+                logPrint("Error in back up : " + ex);
             } finally {
                 if (socket != null && socket.isConnected()) {
                     socket.close();
@@ -466,10 +485,12 @@ public class CentralIndexingServerNode {
         }
 
         private void registerSplitFile(List<File> files) {
+            logPrint("register file with splitting : " + files);
             for (File file : files) {
-                TreeMap<File, byte[]> splitFileMap = FileUtil.splitFile(file, onlinePeerNodeSet);
+                Map<File, byte[]> splitFileMap = FileUtil.splitFile(file, onlinePeerNodeSet);
                 fileSplitRegMap.put(file.getName(), splitFileMap);
             }
+            logPrint("fileSplitRegMap : " + fileSplitRegMap);
         }
     }
 }
