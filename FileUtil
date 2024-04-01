@@ -3,17 +3,10 @@ package IIT_550_hw4;
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public class FileUtil {
+public class FileUtil implements Serializable {
 
     private static final int BUFFER_SIZE = 1024 * 64;
 
@@ -23,8 +16,8 @@ public class FileUtil {
 
     /***
      * Get all file names in the path.
-     * @param path 	traverse file names in the path
-     * @return 		list of file names
+     * @param path    traverse file names in the path
+     * @return list of file names
      */
     public static ArrayList<String> getFiles(String path) {
         ArrayList<String> files = new ArrayList<>();
@@ -44,9 +37,9 @@ public class FileUtil {
 
     /***
      * Find the standard path of file directory in the directory list.
-     * @param fileName	search file name
-     * @param dirList	list of all the directory
-     * @return			the standard path of the input parameter file's directory
+     * @param fileName    search file name
+     * @param dirList    list of all the directory
+     * @return the standard path of the input parameter file's directory
      */
     public static String getFileLocation(String fileName, List<String> dirList) {
         String fileAbsPath = "";
@@ -70,11 +63,11 @@ public class FileUtil {
 
     /***
      * Download the file from the client(ip).
-     * @param ip				download file in this ip
-     * @param port				download file in this ip's port
-     * @param fileName			name of the file
-     * @param regDirPathList	registered files' directory
-     * @return			true: download successfully; false: download unsuccessfully
+     * @param ip                download file in this ip
+     * @param port                download file in this ip's port
+     * @param fileName            name of the file
+     * @param regDirPathList    registered files' directory
+     * @return true: download successfully; false: download unsuccessfully
      */
     public static boolean downloadFile(String ip, int port, String fileName, List<String> regDirPathList) {
         InputStream in = null;
@@ -120,13 +113,13 @@ public class FileUtil {
             fileOutputStream = new FileOutputStream(DOWNLOAD_PATH + fileName);
             fileOutputStream.write(mybytearray);
             File curFile = new File(DOWNLOAD_PATH + fileName);
-            if(curFile.length() == 0) {
+            if (curFile.length() == 0) {
                 isDownloaded = false;
                 curFile.delete();
             } else {
                 isDownloaded = true;
             }
-        } catch(SocketException e) {
+        } catch (SocketException e) {
             isDownloaded = false;
         } catch (Exception e) {
             isDownloaded = false;
@@ -158,12 +151,98 @@ public class FileUtil {
     }
 
     /***
+     *
+     */
+    public static boolean downloadPartFile(String ip, int port, String fileName, int startOffset, int chuckSize) {
+        ObjectInputStream in = null;
+        ObjectOutputStream out = null;
+        BufferedOutputStream bos = null;
+        Socket socket = null;
+        boolean isDownloaded = false;
+
+        try {
+            System.out.println("Downloading file: " + fileName);
+
+            File file = new File(DOWNLOAD_PATH);
+            if (!file.exists()) {
+                file.mkdir();
+            }
+
+            socket = new Socket(ip, port);
+            out = new ObjectOutputStream(socket.getOutputStream());
+            out.flush();
+
+            System.out.println("Requesting file ...");
+            Request request = new Request();
+            request.setRequestType("DOWNLOAD");
+            request.setRequestData(fileName);
+            out.writeObject(request);
+
+            System.out.println("Downloading file ...");
+            int endOffset = startOffset + chuckSize - 1;
+            String filePath = DOWNLOAD_PATH + fileName;
+            in = new ObjectInputStream(socket.getInputStream());
+            Response response = (Response) in.readObject();
+            TreeMap<File, byte[]> filePartInfoMap = (TreeMap<File, byte[]>) response.getResponseData();
+            System.out.println("filePartInfoMap" + filePartInfoMap);
+
+            bos = new BufferedOutputStream(new FileOutputStream(filePath));
+            for (Map.Entry<File, byte[]> entry : filePartInfoMap.entrySet()) {
+                byte[] value = entry.getValue();
+                if (value[1] < startOffset) {
+                    continue;
+                }
+                int rightBon = Math.min(endOffset, value[1]);
+                BufferedInputStream bis = new BufferedInputStream(new FileInputStream(entry.getKey()));
+                byte[] buffer = new byte[rightBon - startOffset + 1];
+                int bytesRead = bis.read(buffer);
+                while (bytesRead != -1) {
+                    bos.write(buffer, 0, bytesRead);
+                    bytesRead = bis.read(buffer);
+                }
+                bis.close();
+                if (endOffset <= value[1]) {
+                    break;
+                }
+            }
+
+            File curFile = new File(filePath);
+            if (curFile.length() == 0) {
+                isDownloaded = false;
+                curFile.delete();
+            } else {
+                isDownloaded = true;
+            }
+        } catch (Exception e) {
+            isDownloaded = false;
+        } finally {
+            try {
+                if (socket != null) {
+                    socket.close();
+                }
+                if (bos != null) {
+                    bos.close();
+                }
+                if (out != null) {
+                    out.close();
+                }
+                if (in != null) {
+                    in.close();
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return isDownloaded;
+    }
+
+    /***
      * Backup the file from the client(ip). (like downloadFile())
-     * @param ip		        backup file in this ip
-     * @param port		        backup file in this ip's port
-     * @param fileName	        name of the file
-     * @param regDirPathList	registered files' directory
-     * @return		    true: backup successfully; false: backup unsuccessfully
+     * @param ip                backup file in this ip
+     * @param port                backup file in this ip's port
+     * @param fileName            name of the file
+     * @param regDirPathList    registered files' directory
+     * @return true: backup successfully; false: backup unsuccessfully
      */
     public static boolean backupFile(String ip, int port, String fileName, List<String> regDirPathList) {
         InputStream in = null;
@@ -208,7 +287,7 @@ public class FileUtil {
             double time = (double) Math.round(endTime - startTime) / 1000;
             log.write("File backed up successfully in " + time + " seconds.");
             isBackedUp = true;
-        } catch(SocketException e) {
+        } catch (SocketException e) {
             log.write("Unable to connect to the host. Unable to backed up file.");
             isBackedUp = false;
             log.write("Error:" + e);
@@ -242,7 +321,7 @@ public class FileUtil {
 
     /***
      * Print the content of the text file.
-     * @param fileName	print this file
+     * @param fileName    print this file
      */
     public static void printFile(String fileName) {
         File file = new File(DOWNLOAD_PATH + fileName);
@@ -275,7 +354,6 @@ public class FileUtil {
     }
 
     /**
-     *
      * @param path
      * @return
      */
@@ -295,23 +373,22 @@ public class FileUtil {
     }
 
     /**
-     *
      * @param file
      * @param onlinePeerNodeSet
      * @return
      */
-    public static TreeMap<File, byte[]> splitFile(File file, TreeSet<Integer> onlinePeerNodeSet) {
+    public static Map<File, byte[]> splitFile(File file, TreeSet<Integer> onlinePeerNodeSet) {
         long fileSize = file.length();
         int parts = onlinePeerNodeSet.size();
         long partSize = fileSize / parts;
-        TreeMap<File, byte[]> map = new TreeMap<>((o1, o2) -> o1.getName().compareTo(o2.getName()));
+        Map<File, byte[]> map = new LinkedHashMap<>();
 
         BufferedInputStream bis = null;
         try {
             bis = new BufferedInputStream(new FileInputStream(file));
             byte record = 0;
-            for (int i = 0; i < parts; i++) {
-                String partFName = file.getName() + "_node_" + i;
+            for (int peerNodeNum : onlinePeerNodeSet) {
+                String partFName = file.getName() + "_node_" + peerNodeNum;
                 File curFile = new File(file.getParent(), partFName);
                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(curFile));
                 byte[] buffer = new byte[(int) partSize];
