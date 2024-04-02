@@ -224,8 +224,11 @@ public class PeerNode_1 {
 
                                     System.out.println(
                                             "The file has downloaded in the current path's sub-directory '/downloads'.");
+                                    int lastIndexOf = fileName.lastIndexOf(".");
+                                    String suffix = fileName.substring(lastIndexOf);
+                                    String standardName = fileName.substring(0, lastIndexOf) + "_copied_";
                                     if (dOrP.equalsIgnoreCase("P")) {
-                                        FileUtil.printFile(fileName);
+                                        FileUtil.printFile(standardName + "1" + suffix);
                                     }
                                 } else {
                                     System.out.print("Download or not? (Y/N): ");
@@ -379,11 +382,11 @@ public class PeerNode_1 {
         }
 
         private void downloadFile(String ip,
-                String fileName,
-                ObjectOutputStream out,
-                ObjectInputStream in,
-                int startOffset,
-                int chuckSize) {
+                                  String fileName,
+                                  ObjectOutputStream out,
+                                  ObjectInputStream in,
+                                  int startOffset,
+                                  int chuckSize) {
             boolean isDownloaded = false;
             long startTime = System.currentTimeMillis();
             long fileSize = FileUtil.downloadPartFile(ip, SERVER_SOCKET_PORT_1, fileName, startOffset, chuckSize);
@@ -412,10 +415,9 @@ public class PeerNode_1 {
 
             long endTime = System.currentTimeMillis();
             long time = endTime - startTime;
-            double speed = Math.round(((double) time / fileSize * 100.0) / 100.0);
-
+            String speed = String.format("%.2f", (double) fileSize / time);
             System.out.println("File downloaded successfully. Take " + time + " ms. "
-                    + "Speed is " + speed + " ms/byte.");
+                    + "Speed is " + speed + " byte/ms.");
 
             if (isDownloaded) {
                 System.out.println("File downloaded successfully");
@@ -452,15 +454,20 @@ public class PeerNode_1 {
                     String fileName = (String) request.getRequestData();
                     oOut = new ObjectOutputStream(socket.getOutputStream());
                     Response response = new Response();
-                    Map<File, Integer> filePartInfoMap = fileSplitRegMap.get(fileName);
-                    System.out.println("\n------ The file chunk distribution is as follows: ------");
-                    for (Map.Entry<File, Integer> entry : filePartInfoMap.entrySet()) {
-                        String name = entry.getKey().getName();
-                        String peerNodeNum = name.substring(name.indexOf("_node_") + 6);
-                        logPrint("Chunk [ " + entry.getValue() + " ] from peer [ " + peerNodeNum + " ].");
+                    if (fileSplitRegMap.containsKey(fileName)) {
+                        Map<File, Integer> filePartInfoMap = fileSplitRegMap.get(fileName);
+                        System.out.println("\n------ The file chunk distribution is as follows: ------");
+                        for (Map.Entry<File, Integer> entry : filePartInfoMap.entrySet()) {
+                            String name = entry.getKey().getName();
+                            String peerNodeNum = name.substring(name.indexOf("_node_") + 6);
+                            logPrint("Chunk [ " + entry.getValue() + " ] from peer [ " + peerNodeNum + " ].");
+                        }
+                        System.out.println();
+                        response.setResponseData(filePartInfoMap);
+                    } else {
+                        response.setResponseCode(299);
+                        response.setResponseData("File name [ " + fileName + " ] has been deleted");
                     }
-                    System.out.println();
-                    response.setResponseData(filePartInfoMap);
                     oOut.writeObject(response);
                     logPrint("File part information map sent successfully.");
                     System.out.println();
