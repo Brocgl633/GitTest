@@ -50,12 +50,15 @@ public class CentralIndexingServerNode {
     private static List<String> backupClientIpList = Collections.synchronizedList(new ArrayList<>());
 
     /**
-     *
+     * The peer nodes which are connected to the network.
      */
     private static TreeSet<Integer> onlinePeerNodeSet = new TreeSet<>((o1, o2) -> o1 - o2);
 
     /**
-     *
+     * key: registered file name
+     * value: [key=part file, value=the peer to which this part file belongs]
+     * eg. {t1.txt={C:\Users\Administrator\Downloads\iit_550_test_files\t1.txt_node_1=1},
+     *      t2.txt={C:\Users\Administrator\Downloads\iit_550_test_files\t2.txt_node_1=1, C:\Users\Administrator\Downloads\iit_550_test_files\t2.txt_node_2=2}}
      */
     private static Map<String, Map<File, Integer>> fileSplitRegMap = new HashMap<>();
 
@@ -184,6 +187,7 @@ public class CentralIndexingServerNode {
                         String fileName = (String) data[2];
                         logPrint("Request from Peer node id [ " + clientId + " ] and ip [ " + clientIp + " ] to delete file: " + fileName);
                         int count = delete(clientId, ip, fileName);
+                        fileSplitRegMap.remove(fileName);
                         response = new Response();
                         if (count > 0) {
                             response.setResponseCode(200);
