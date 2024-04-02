@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class FileUtil implements Serializable {
@@ -150,15 +152,19 @@ public class FileUtil implements Serializable {
         return isDownloaded;
     }
 
-    /***
-     *
+    /**
+     * Download file block addresses on nodes located at different peers.
+     * @param ip: server ip
+     * @param port: server port
+     * @param fileName: downloaded file name
+     * @param startOffset: downloaded file start offset
+     * @param chuckSize: downloaded file length
+     * @return
      */
-    public static boolean downloadPartFile(String ip, int port, String fileName, int startOffset, int chuckSize) {
+    public static long downloadPartFile(String ip, int port, String fileName, int startOffset, int chuckSize) {
         ObjectInputStream in = null;
         ObjectOutputStream out = null;
-        BufferedOutputStream bos = null;
         Socket socket = null;
-        boolean isDownloaded = false;
 
         try {
             System.out.println("Downloading file: " + fileName);
@@ -178,50 +184,31 @@ public class FileUtil implements Serializable {
             request.setRequestData(fileName);
             out.writeObject(request);
 
-            System.out.println("Downloading file ...");
-            int endOffset = startOffset + chuckSize - 1;
-            String filePath = DOWNLOAD_PATH + fileName;
             in = new ObjectInputStream(socket.getInputStream());
             Response response = (Response) in.readObject();
-            TreeMap<File, byte[]> filePartInfoMap = (TreeMap<File, byte[]>) response.getResponseData();
-            System.out.println("filePartInfoMap" + filePartInfoMap);
+            Map<File, Integer> filePartInfoMap = (Map<File, Integer>) response.getResponseData();
 
-            bos = new BufferedOutputStream(new FileOutputStream(filePath));
-            for (Map.Entry<File, byte[]> entry : filePartInfoMap.entrySet()) {
-                byte[] value = entry.getValue();
-                if (value[1] < startOffset) {
-                    continue;
-                }
-                int rightBon = Math.min(endOffset, value[1]);
-                BufferedInputStream bis = new BufferedInputStream(new FileInputStream(entry.getKey()));
-                byte[] buffer = new byte[rightBon - startOffset + 1];
-                int bytesRead = bis.read(buffer);
-                while (bytesRead != -1) {
-                    bos.write(buffer, 0, bytesRead);
-                    bytesRead = bis.read(buffer);
-                }
-                bis.close();
-                if (endOffset <= value[1]) {
-                    break;
-                }
+            System.out.println("Downloading file ...");
+            String lastFilePath = "";
+            int lastIndexOf = fileName.lastIndexOf(".");
+            String suffix = fileName.substring(lastIndexOf);
+            String standardName = fileName.substring(0, lastIndexOf) + "_copied_";
+            for (int i = 1; i <= 10; i++) {
+                String filePath = DOWNLOAD_PATH + standardName + i + suffix;
+                lastFilePath = filePath;
+                ExecutorService executor = Executors.newFixedThreadPool(filePartInfoMap.size());
+                executor.submit(() -> readPartFile(filePath, startOffset, chuckSize, filePartInfoMap));
+                executor.shutdown();
             }
 
-            File curFile = new File(filePath);
-            if (curFile.length() == 0) {
-                isDownloaded = false;
-                curFile.delete();
-            } else {
-                isDownloaded = true;
-            }
-        } catch (Exception e) {
-            isDownloaded = false;
+            File curFile = new File(lastFilePath);
+            return curFile.length();
+        } catch (IOException | ClassNotFoundException ex) {
+            ex.printStackTrace();
         } finally {
             try {
                 if (socket != null) {
                     socket.close();
-                }
-                if (bos != null) {
-                    bos.close();
                 }
                 if (out != null) {
                     out.close();
@@ -233,7 +220,45 @@ public class FileUtil implements Serializable {
                 ex.printStackTrace();
             }
         }
-        return isDownloaded;
+        return 0;
+    }
+
+    private static void readPartFile(String filePath, int startOffset, int chuckSize, Map<File, Integer> filePartInfoMap) {
+        FileOutputStream fos = null;
+        long remainingLen = chuckSize;
+        for (Map.Entry<File, Integer> entry : filePartInfoMap.entrySet()) {
+            File curFile = entry.getKey();
+            long fileSize = curFile.length();
+            if (startOffset >= fileSize) {
+                startOffset -= fileSize;
+                continue;
+            }
+            try (RandomAccessFile raf = new RandomAccessFile(entry.getKey(), "r")) {
+                fos = new FileOutputStream(filePath);
+                raf.seek(startOffset);
+                int bytesToRead = (int) Math.min(remainingLen, fileSize - startOffset);
+                byte[] buffer = new byte[bytesToRead];
+                int bytesRead = raf.read(buffer);
+                if (bytesRead != -1) {
+                    fos.write(buffer, 0, bytesRead);
+                    remainingLen -= bytesToRead;
+                    startOffset = 0;
+                    if (remainingLen == 0) {
+                        break;
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (fos != null) {
+                    try {
+                        fos.close();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        }
     }
 
     /***
@@ -377,24 +402,23 @@ public class FileUtil implements Serializable {
      * @param onlinePeerNodeSet
      * @return
      */
-    public static Map<File, byte[]> splitFile(File file, TreeSet<Integer> onlinePeerNodeSet) {
+    public static Map<File, Integer> splitFile(File file, TreeSet<Integer> onlinePeerNodeSet) {
         long fileSize = file.length();
         int parts = onlinePeerNodeSet.size();
         long partSize = fileSize / parts;
-        Map<File, byte[]> map = new LinkedHashMap<>();
+        Map<File, Integer> map = new LinkedHashMap<>();
 
         BufferedInputStream bis = null;
         try {
             bis = new BufferedInputStream(new FileInputStream(file));
-            byte record = 0;
+            int idx = 1;
             for (int peerNodeNum : onlinePeerNodeSet) {
                 String partFName = file.getName() + "_node_" + peerNodeNum;
                 File curFile = new File(file.getParent(), partFName);
                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(curFile));
                 byte[] buffer = new byte[(int) partSize];
                 int bytesRead = bis.read(buffer);
-                map.put(curFile, new byte[]{record, (byte) (record + partSize)});
-                record += partSize + 1;
+                map.put(curFile, idx++);
                 bos.write(buffer, 0, bytesRead);
                 bos.close();
             }
