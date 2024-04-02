@@ -57,9 +57,7 @@ public class CentralIndexingServerNode {
     /**
      *
      */
-    private static Map<String, Map<File, byte[]>> fileSplitRegMap = new HashMap<>();
-
-
+    private static Map<String, Map<File, Integer>> fileSplitRegMap = new HashMap<>();
 
     private static int peerCount = 0;
 
@@ -215,7 +213,7 @@ public class CentralIndexingServerNode {
                     } else if (requestType.equalsIgnoreCase("UPDATE_SPLIT_FILE")) {
                         System.out.println("Start transfer the part file information to Server...");
                         String serverIp = (String) clientRequest.getRequestData();
-                        sendPartFileInfo(serverIp);
+                        updatePartFileInfo(serverIp);
                         System.out.println("Part file nodes information sent.");
                     }  else if (requestType.equalsIgnoreCase("GET_BACKUP_NODES")) {
                         System.out.println("Start getting backup nodes information ...");
@@ -254,15 +252,27 @@ public class CentralIndexingServerNode {
             }
         }
 
-        private void sendPartFileInfo(String serverIp) throws IOException {
+        private void updatePartFileInfo(String serverIp) throws IOException {
+            Request request = new Request();
+            request.setRequestType("UPDATE_FILE_PART");
+            request.setRequestData(fileSplitRegMap);
             ObjectOutputStream out = null;
             Socket socket = null;
             try {
                 socket = new Socket(serverIp, SERVER_SOCKET_PORT_1);
                 out = new ObjectOutputStream(socket.getOutputStream());
-                Request request = new Request();
-                request.setRequestType("UPDATE_FILE_PART");
-                request.setRequestData(fileSplitRegMap);
+                out.writeObject(request);
+
+                socket = new Socket(serverIp, SERVER_SOCKET_PORT_2);
+                out = new ObjectOutputStream(socket.getOutputStream());
+                out.writeObject(request);
+
+                socket = new Socket(serverIp, SERVER_SOCKET_PORT_3);
+                out = new ObjectOutputStream(socket.getOutputStream());
+                out.writeObject(request);
+
+                socket = new Socket(serverIp, SERVER_SOCKET_PORT_4);
+                out = new ObjectOutputStream(socket.getOutputStream());
                 out.writeObject(request);
                 logPrint("fileSplitRegMap : " + fileSplitRegMap);
             } catch (IOException ex) {
@@ -487,8 +497,8 @@ public class CentralIndexingServerNode {
         private void registerSplitFile(List<File> files) {
             logPrint("register file with splitting : " + files);
             for (File file : files) {
-                Map<File, byte[]> splitFileMap = FileUtil.splitFile(file, onlinePeerNodeSet);
-                fileSplitRegMap.put(file.getName(), splitFileMap);
+                Map<File, Integer> partFileList = FileUtil.splitFile(file, onlinePeerNodeSet);
+                fileSplitRegMap.put(file.getName(), partFileList);
             }
             logPrint("fileSplitRegMap : " + fileSplitRegMap);
         }
