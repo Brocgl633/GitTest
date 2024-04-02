@@ -186,6 +186,10 @@ public class FileUtil implements Serializable {
 
             in = new ObjectInputStream(socket.getInputStream());
             Response response = (Response) in.readObject();
+            if (response.getResponseCode() == 299) {
+                System.out.println((String) response.getResponseData());
+                return 0;
+            }
             Map<File, Integer> filePartInfoMap = (Map<File, Integer>) response.getResponseData();
 
             System.out.println("Downloading file ...");
@@ -224,40 +228,33 @@ public class FileUtil implements Serializable {
     }
 
     private static void readPartFile(String filePath, int startOffset, int chuckSize, Map<File, Integer> filePartInfoMap) {
-        FileOutputStream fos = null;
-        long remainingLen = chuckSize;
-        for (Map.Entry<File, Integer> entry : filePartInfoMap.entrySet()) {
-            File curFile = entry.getKey();
-            long fileSize = curFile.length();
-            if (startOffset >= fileSize) {
-                startOffset -= fileSize;
-                continue;
-            }
-            try (RandomAccessFile raf = new RandomAccessFile(entry.getKey(), "r")) {
-                fos = new FileOutputStream(filePath);
-                raf.seek(startOffset);
-                int bytesToRead = (int) Math.min(remainingLen, fileSize - startOffset);
-                byte[] buffer = new byte[bytesToRead];
-                int bytesRead = raf.read(buffer);
-                if (bytesRead != -1) {
-                    fos.write(buffer, 0, bytesRead);
-                    remainingLen -= bytesToRead;
-                    startOffset = 0;
-                    if (remainingLen == 0) {
-                        break;
-                    }
+        try (FileOutputStream fos = new FileOutputStream(filePath)) {
+            long remainingLen = chuckSize;
+            for (Map.Entry<File, Integer> entry : filePartInfoMap.entrySet()) {
+                File curFile = entry.getKey();
+                long fileSize = curFile.length();
+                if (startOffset >= fileSize) {
+                    startOffset -= fileSize;
+                    continue;
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (fos != null) {
-                    try {
-                        fos.close();
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
+                try (RandomAccessFile raf = new RandomAccessFile(entry.getKey(), "r")) {
+
+                    raf.seek(startOffset);
+                    int bytesToRead = (int) Math.min(remainingLen, fileSize - startOffset);
+                    byte[] buffer = new byte[bytesToRead];
+                    int bytesRead = raf.read(buffer);
+                    if (bytesRead != -1) {
+                        fos.write(buffer, 0, bytesRead);
+                        remainingLen -= bytesToRead;
+                        startOffset = 0;
+                        if (remainingLen == 0) {
+                            break;
+                        }
                     }
                 }
             }
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
     }
 
