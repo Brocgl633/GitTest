@@ -1,0 +1,15 @@
+1. Install native java. 
+2. Configure Java environment variables on Linux. 
+3. Create a folder and run the vim command to create java files in the “Source Code” folder. 
+4. Compile java files using the javac command in multiple terminals.
+javac CentralIndexingServerNode.java
+javac PeerNode_1.java
+javac PeerNode_2.java
+javac PeerNode_3.java
+javac PeerNode_4.java
+5. Run the .class file in multiple terminals.
+java CentralIndexingServerNode
+java PeerNode_1
+java PeerNode_2
+java PeerNode_3
+java PeerNode_4
