@@ -1,0 +1,104 @@
+package iit_cs586.AbstractFactory;
+
+import iit_cs586.OutputApi.cancelMsg.CancelMsg;
+import iit_cs586.OutputApi.cancelMsg.CancelMsg2;
+import iit_cs586.OutputApi.displayMenu.DisplayMenu;
+import iit_cs586.OutputApi.displayMenu.DisplayMenu2;
+import iit_cs586.OutputApi.ejectCard.EjectCard;
+import iit_cs586.OutputApi.ejectCard.EjectCard2;
+import iit_cs586.OutputApi.gasPumpedMsg.GasPumpedMsg;
+import iit_cs586.OutputApi.gasPumpedMsg.GasPumpedMsg2;
+import iit_cs586.OutputApi.payMsg.PayMsg;
+import iit_cs586.OutputApi.payMsg.PayMsg2;
+import iit_cs586.OutputApi.printReceipt.PrintReceipt;
+import iit_cs586.OutputApi.printReceipt.PrintReceipt2;
+import iit_cs586.OutputApi.pumpGasUnit.PumpGasUnit;
+import iit_cs586.OutputApi.pumpGasUnit.PumpGasUnit2;
+import iit_cs586.OutputApi.rejectMsg.RejectMsg;
+import iit_cs586.OutputApi.rejectMsg.RejectMsg2;
+import iit_cs586.OutputApi.returnCash.ReturnCash;
+import iit_cs586.OutputApi.returnCash.ReturnCash2;
+import iit_cs586.OutputApi.setInitialValue.SetInitialValue;
+import iit_cs586.OutputApi.setInitialValue.SetInitialValue2;
+import iit_cs586.OutputApi.setPayType.SetPayType;
+import iit_cs586.OutputApi.setPayType.SetPayType2;
+import iit_cs586.OutputApi.setPrice.SetPrice;
+import iit_cs586.OutputApi.setPrice.SetPrice2;
+import iit_cs586.OutputApi.storeCash.StoreCash;
+import iit_cs586.OutputApi.storeCash.StoreCash2;
+import iit_cs586.OutputApi.storeData.StorePrices;
+import iit_cs586.OutputApi.storeData.StorePrices2;
+
+public class PumpFactory2 implements PumpFactory {
+
+    @Override
+    public StorePrices doStorePrices() {
+        return new StorePrices2();
+    }
+
+    @Override
+    public PayMsg doPayMsg() {
+        return new PayMsg2();
+    }
+
+    @Override
+    public StoreCash doStoreCash() {
+        return new StoreCash2();
+    }
+
+    @Override
+    public DisplayMenu doDisplayMenu() {
+        return new DisplayMenu2();
+    }
+
+    @Override
+    public RejectMsg doRejectMsg() {
+        return new RejectMsg2();
+    }
+
+    @Override
+    public SetPrice doSetPrice() {
+        return new SetPrice2();
+    }
+
+    @Override
+    public SetInitialValue doSetInitialValue() {
+        return new SetInitialValue2();
+    }
+
+    @Override
+    public PumpGasUnit doPumpGasUnit() {
+        return new PumpGasUnit2();
+    }
+
+    @Override
+    public GasPumpedMsg doGasPumpedMsg() {
+        return new GasPumpedMsg2();
+    }
+
+    @Override
+    public PrintReceipt doPrintReceipt() {
+        return new PrintReceipt2();
+    }
+
+    @Override
+    public CancelMsg doCancelMsg() {
+        return new CancelMsg2();
+    }
+
+    @Override
+    public ReturnCash doReturnCash() {
+        return new ReturnCash2();
+    }
+
+    @Override
+    public SetPayType doSetPayType() {
+        return new SetPayType2();
+    }
+
+    @Override
+    public EjectCard doEjectCard() {
+        return new EjectCard2();
+    }
+
+}
