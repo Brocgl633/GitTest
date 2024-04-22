@@ -1,0 +1,5 @@
+package iit_cs586.OutputApi.printReceipt;
+
+public interface PrintReceipt {
+    void showPrintReceipt();
+}
