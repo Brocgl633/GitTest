@@ -1,0 +1,11 @@
+package iit_cs586.OutputApi.payMsg;
+
+public class PayMsg1 implements PayMsg {
+
+    @Override
+    public void showPayMsg() {
+        System.out.println("Please choose a pay type: ");
+        System.out.println();
+    }
+
+}
