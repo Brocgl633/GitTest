@@ -1,0 +1,10 @@
+package iit_cs586.OutputApi.rejectMsg;
+
+public class RejectMsg1 implements RejectMsg {
+    @Override
+    public void showRejectMsg() {
+        System.out.println("Rejected, please start again !!!");
+        System.out.println();
+    }
+
+}
