@@ -1,0 +1,78 @@
+package iit_cs586;
+
+import iit_cs586.AbstractFactory.PumpFactory;
+
+public class Output {
+
+    public PumpFactory pf;
+
+    public void storeData() {
+        pf = GasStation.pf;
+        pf.doStorePrices().saveData();
+    }
+
+    public void payMsg() {
+        pf = GasStation.pf;
+        pf.doPayMsg().showPayMsg();
+    }
+
+    public void storeCash() {
+        pf = GasStation.pf;
+        pf.doStoreCash().showStoreCash();
+    }
+
+    public void setPayTypeFlag(int w) {
+        pf = GasStation.pf;
+        pf.doSetPayType().showSetPayTypeFlag(w);
+    }
+
+    public void displayMenu() {
+        pf = GasStation.pf;
+        pf.doDisplayMenu().showMenu();
+    }
+
+    public void rejectMsg() {
+        pf = GasStation.pf;
+        pf.doRejectMsg().showRejectMsg();
+    }
+
+    public void ejectCard() {
+        pf = GasStation.pf;
+        pf.doEjectCard().showEjectCard();
+    }
+
+    public void setPrice(int g) {
+        pf = GasStation.pf;
+        pf.doSetPrice().showSetPrice(g);
+    }
+
+    public void setInitialValue() {
+        pf = GasStation.pf;
+        pf.doSetInitialValue().showSetInitialValue();
+    }
+
+    public void pumpGasUnit() {
+        pf = GasStation.pf;
+        pf.doPumpGasUnit().showPumpGasUnit();
+    }
+
+    public void gasPumpedMsg() {
+        pf = GasStation.pf;
+        pf.doGasPumpedMsg().showGasPumpedMsg();
+    }
+
+    public void printReceipt() {
+        pf = GasStation.pf;
+        pf.doPrintReceipt().showPrintReceipt();
+    }
+
+    public void cancelMsg() {
+        pf = GasStation.pf;
+        pf.doCancelMsg().showCancelMsg();
+    }
+
+    public void returnCash() {
+        pf = GasStation.pf;
+        pf.doReturnCash().showReturnCash();
+    }
+}
