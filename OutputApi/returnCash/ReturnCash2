@@ -1,0 +1,14 @@
+package iit_cs586.OutputApi.returnCash;
+
+import iit_cs586.GasStation;
+
+public class ReturnCash2 implements ReturnCash {
+
+    @Override
+    public void showReturnCash() {
+        float returnCash = GasStation.ds2.cash - GasStation.ds2.total;
+		System.out.println("Return the remain cash " + String.format("%.2f", returnCash) + "$ to you !!!");
+        System.out.println();
+    }
+
+}
