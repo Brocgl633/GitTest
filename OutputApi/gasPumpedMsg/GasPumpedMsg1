@@ -1,0 +1,13 @@
+package iit_cs586.OutputApi.gasPumpedMsg;
+
+import iit_cs586.GasStation;
+
+public class GasPumpedMsg1 implements GasPumpedMsg {
+
+    @Override
+    public void showGasPumpedMsg() {
+        System.out.println("Gas has pumped: " + GasStation.ds1.L + " liters.");
+        System.out.println();
+    }
+
+}
