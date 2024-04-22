@@ -1,0 +1,21 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2024-2024. All rights reserved.
+ */
+
+package iit_cs586.OutputApi.ejectCard;
+
+/**
+ * TODO
+ *
+ * @author c30035198
+ * @since 2024-04-22 15:00
+ */
+public class EjectCard2 implements EjectCard {
+
+    @Override
+    public void showEjectCard() {
+        System.out.println("Your card is ejected !!!");
+        System.out.println();
+    }
+
+}
