@@ -1,0 +1,11 @@
+package iit_cs586.OutputApi.cancelMsg;
+
+public class CancelMsg1 implements CancelMsg {
+
+	@Override
+	public void showCancelMsg() {
+		System.out.println("Transaction canceled, please start again !!!");
+		System.out.println();
+	}
+
+}
