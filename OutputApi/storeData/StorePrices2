@@ -1,0 +1,15 @@
+package iit_cs586.OutputApi.storeData;
+import iit_cs586.gaspump.GasPump2;
+
+public class StorePrices2 implements StorePrices {
+	@Override
+	public void saveData()
+	{
+		GasPump2.ds2.Rprice = GasPump2.ds2.temp_a;
+		GasPump2.ds2.Pprice = GasPump2.ds2.temp_b;
+		GasPump2.ds2.Dprice = GasPump2.ds2.temp_c;
+		System.out.println("Gas price updated !!!");
+		System.out.println();
+	}
+
+}
