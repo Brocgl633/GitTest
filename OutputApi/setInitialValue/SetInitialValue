@@ -1,0 +1,5 @@
+package iit_cs586.OutputApi.setInitialValue;
+
+public interface SetInitialValue {
+	void showSetInitialValue();
+}
