@@ -1,0 +1,87 @@
+package iit_cs586;
+
+import iit_cs586.State.S0;
+import iit_cs586.State.S1;
+import iit_cs586.State.S2;
+import iit_cs586.State.S3;
+import iit_cs586.State.S4;
+import iit_cs586.State.S5;
+import iit_cs586.State.S6;
+import iit_cs586.State.State;
+
+public class MDA_EFSM {
+
+    public State s;
+
+    public State[] sList = new State[7];
+
+    public Output op = new Output();
+
+    public MDA_EFSM() {
+        sList[0] = new S0(this);
+        sList[1] = new S1(this);
+        sList[2] = new S2(this);
+        sList[3] = new S3(this);
+        sList[4] = new S4(this);
+        sList[5] = new S5(this);
+        sList[6] = new S6(this);
+        s = sList[0];
+    }
+
+    public void changeState(int state) {
+        s = sList[state];
+    }
+
+    public void Activate() {
+        s.Activate();
+    }
+
+    public void Start() {
+        s.Start();
+    }
+
+    public void PayType(int t) {
+        s.PayType(t);
+    }
+
+    public void Reject() {
+        s.Reject();
+    }
+
+    public void Cancel() {
+        s.Cancel();
+    }
+
+    public void Approved() {
+        s.Approved();
+    }
+
+    public void SelectGas(int g) {
+        s.SelectGas(g);
+    }
+
+    public void StartPump() {
+        s.StartPump();
+    }
+
+    public void Pump() {
+        s.Pump();
+    }
+
+    public void StopPump() {
+        s.StopPump();
+    }
+
+    public void Receipt() {
+        s.Receipt();
+    }
+
+    public void NoReceipt() {
+        s.NoReceipt();
+    }
+
+    public void Continue() {
+        s.Continue();
+    }
+
+}
