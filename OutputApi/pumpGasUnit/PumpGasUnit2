@@ -1,0 +1,14 @@
+package iit_cs586.OutputApi.pumpGasUnit;
+
+import iit_cs586.GasStation;
+import iit_cs586.gaspump.GasPump2;
+
+public class PumpGasUnit2 implements PumpGasUnit {
+
+    @Override
+    public void showPumpGasUnit() {
+        GasStation.ds2.G = GasStation.ds2.G + 1;
+        GasPump2.ds2.total = GasPump2.ds2.price * ((float) GasPump2.ds2.G);
+    }
+
+}
