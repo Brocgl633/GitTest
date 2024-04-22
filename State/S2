@@ -1,0 +1,85 @@
+package iit_cs586.State;
+
+import iit_cs586.MDA_EFSM;
+
+public class S2 extends State {
+
+    public S2(MDA_EFSM m) {
+        mda = m;
+    }
+
+    @Override
+    public void Activate() {
+        System.out.println("Can't activate right now !!!");
+        System.out.println();
+    }
+
+    @Override
+    public void Start() {
+        System.out.println("You have already started !!!");
+        System.out.println();
+    }
+
+    @Override
+    public void PayType(int p) {
+        System.out.println("We have already accepted your Pay Type !!!");
+        System.out.println();
+    }
+
+    @Override
+    public void Reject() {
+        mda.op.rejectMsg();
+        mda.op.ejectCard();
+        mda.changeState(0);
+    }
+
+    @Override
+    public void Cancel() {
+        System.out.println("The credit card isn't approved !!!");
+        System.out.println();
+    }
+
+    @Override
+    public void Approved() {
+        mda.op.setPayTypeFlag(1);
+        mda.op.displayMenu();
+        mda.changeState(3);
+    }
+
+    @Override
+    public void SelectGas(int g) {
+        System.out.println("The credit card isn't approved !!!");
+        System.out.println();
+    }
+
+    @Override
+    public void StartPump() {
+        System.out.println("The credit card isn't approved !!!");
+        System.out.println();
+    }
+
+    @Override
+    public void Pump() {
+        System.out.println("The credit card isn't approved !!!");
+        System.out.println();
+    }
+
+    @Override
+    public void StopPump() {
+        System.out.println("The credit card isn't approved !!!");
+        System.out.println();
+    }
+
+    @Override
+    public void Receipt() {
+        System.out.println("The credit card isn't approved !!!");
+        System.out.println();
+    }
+
+    @Override
+    public void NoReceipt() {
+        System.out.println("The credit card isn't approved !!!");
+        System.out.println();
+    }
+
+}
