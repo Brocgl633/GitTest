@@ -1,0 +1,227 @@
+package iit_cs586;
+
+import iit_cs586.AbstractFactory.PumpFactory;
+import iit_cs586.AbstractFactory.PumpFactory1;
+import iit_cs586.AbstractFactory.PumpFactory2;
+import iit_cs586.data.DS1;
+import iit_cs586.data.DS2;
+import iit_cs586.gaspump.GasPump1;
+import iit_cs586.gaspump.GasPump2;
+
+import java.util.Scanner;
+
+public class GasStation {
+
+    public static PumpFactory pf;
+
+    public static DS1 ds1;
+
+    public static DS2 ds2;
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+        while (true) {
+
+            System.out.println("****** Welcome to Gas Station ******");
+            System.out.println("1. Press 1 for GasPump1.");
+            System.out.println("2. Press 2 for GasPump2.");
+            System.out.println("3. Press 3 to exit the program.");
+            System.out.println();
+            System.out.println("Please enter your choice : ");
+
+            int gasPump = sc.nextInt();
+            int ch = 1;
+
+            if (gasPump == 1) {
+                GasPump1 gp1 = new GasPump1();
+                pf = new PumpFactory1();
+
+                System.out.println("GasPump-1");
+                System.out.println("MENU of Operations");
+                System.out.println("0. Activate(int)");
+                System.out.println("1. Start()");
+                System.out.println("2. PayCredit");
+                System.out.println("3. Reject()");
+                System.out.println("4. Cancel()");
+                System.out.println("5. Approved()");
+                System.out.println("6. PayCash(int)");
+                System.out.println("7. StartPump()");
+                System.out.println("8. Pump()");
+                System.out.println("9. StopPump()");
+                System.out.println("20. Quit the program");
+
+                System.out.println("Please make a note of these operations");
+                System.out.println("GasPump-1 Execution");
+
+                while (ch != 20) {
+                    System.out.println("Select Operation: ");
+                    System.out.println("0-Activate, 1-Start, 2-PayCredit, 3-Reject, "
+                            + "4-Cancel, 5-Approved, 6-PayCash, 7-StartPump, " + "8-Pump, 9-StopPump, 20-quit");
+
+                    ch = sc.nextInt();
+                    switch (ch) {
+                        case 0: { //Activate()
+                            System.out.println("Operation: Activate(int a)");
+                            System.out.println("Enter value of the parameter a:");
+                            int a = sc.nextInt();
+                            gp1.Activate(a);
+                            break;
+                        }
+                        case 1: { //Start
+                            System.out.println("Operation: Start()");
+                            gp1.Start();
+                            break;
+                        }
+                        case 2: { //PayCredit
+                            System.out.println("Operation: PayCredit()");
+                            gp1.PayCredit();
+                            break;
+                        }
+                        case 3: { //Reject
+                            System.out.println("Operation: Reject()");
+                            gp1.Reject();
+                            break;
+                        }
+                        case 4: { //Cancel
+                            System.out.println("Operation: Cancel()");
+                            gp1.Cancel();
+                            break;
+                        }
+                        case 5: { //Approved
+                            System.out.println("Operation: Approved()");
+                            gp1.Approved();
+                            break;
+                        }
+                        case 6: { //PayCash
+                            System.out.println("Operation: PayCash(int c)");
+                            System.out.println("Enter value of the parameter c:");
+                            int c = sc.nextInt();
+                            gp1.PayCash(c);
+                            break;
+                        }
+                        case 7: { //StartPump
+                            System.out.println("Operation: StartPump()");
+                            gp1.StartPump();
+                            break;
+                        }
+                        case 8: { //Pump
+                            System.out.println("Operation: Pump()");
+                            gp1.Pump();
+                            break;
+                        }
+                        case 9: { //StopPump
+                            System.out.println("Operation: StopPump()");
+                            gp1.StopPump();
+                            break;
+                        }
+                    }
+                }
+            } else if (gasPump == 2) {
+                GasPump2 gp2 = new GasPump2();
+                pf = new PumpFactory2();
+
+                System.out.println("GasPump-2");
+                System.out.println("MENU of Operations");
+                System.out.println("0. Activate(float, float, float)");
+                System.out.println("1. Start()");
+                System.out.println("2. PayCash(int)");
+                System.out.println("3. Cancel()");
+                System.out.println("4. Premium()");
+                System.out.println("5. Regular()");
+                System.out.println("6. Diesel()");
+                System.out.println("7. StartPump()");
+                System.out.println("8. PumpGallon()");
+                System.out.println("9. Stop()");
+                System.out.println("10. Receipt()");
+                System.out.println("11. NoReceipt()");
+                System.out.println("20. Quit the program");
+
+                System.out.println("Please make a note of these operations");
+                System.out.println("GasPump-2 Execution");
+
+                while (ch != 20) {
+                    System.out.println("Select Operation: ");
+                    System.out.println("0-Activate, 1-Start, 2-PayCash, 3-Cancel, "
+                            + "4-Premium, 5-Regular, 6-Diesel, 7-StartPump, "
+                            + "8-PumpGallon, 9-Stop, 10-Receipt, 11-NoReceipt, 20-quit");
+
+                    ch = sc.nextInt();
+                    switch (ch) {
+                        case 0: { //Activate()
+                            System.out.println("Operation: Activate(float a, float b, float c)");
+                            System.out.println("Enter value of the parameter a:");
+                            int a = sc.nextInt();
+                            System.out.println("Enter value of the parameter a:");
+                            int b = sc.nextInt();
+                            System.out.println("Enter value of the parameter a:");
+                            int c = sc.nextInt();
+                            gp2.Activate(a, b, c);
+                            break;
+                        }
+                        case 1: { //Start
+                            System.out.println("Operation: Start()");
+                            gp2.Start();
+                            break;
+                        }
+                        case 2: { //PayCash
+                            System.out.println("Operation: PayCash(int c)");
+                            System.out.println("Enter value of the parameter c:");
+                            int c = sc.nextInt();
+                            gp2.PayCash(c);
+                            break;
+                        }
+                        case 3: { //Cancel
+                            System.out.println("Operation: Cancel()");
+                            gp2.Cancel();
+                            break;
+                        }
+                        case 4: { //Premium
+                            System.out.println("Operation: Premium()");
+                            gp2.Premium();
+                            break;
+                        }
+                        case 5: { //Regular
+                            System.out.println("Operation: Regular()");
+                            gp2.Regular();
+                            break;
+                        }
+                        case 6: { //Diesel
+                            System.out.println("Operation: Diesel()");
+                            gp2.Diesel();
+                            break;
+                        }
+                        case 7: { //StartPump
+                            System.out.println("Operation: StartPump()");
+                            gp2.StartPump();
+                            break;
+                        }
+                        case 8: { //PumpGallon
+                            System.out.println("Operation: PumpGallon()");
+                            gp2.PumpGallon();
+                            break;
+                        }
+                        case 9: { //Stop
+                            System.out.println("Operation: Stop()");
+                            gp2.Stop();
+                            break;
+                        }
+                        case 10: { //Receipt
+                            System.out.println("Operation: Receipt()");
+                            gp2.Receipt();
+                            break;
+                        }
+                        case 11: { //NoReceipt
+                            System.out.println("Operation: NoReceipt()");
+                            gp2.NoReceipt();
+                            break;
+                        }
+                    }
+                }
+            } else if (gasPump == 3) {
+                System.out.println("Exit the program, see you again !!!");
+                break;
+            }
+        }
+    }
+}
