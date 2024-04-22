@@ -1,0 +1,48 @@
+package iit_cs586.AbstractFactory;
+
+import iit_cs586.OutputApi.cancelMsg.CancelMsg;
+import iit_cs586.OutputApi.displayMenu.DisplayMenu;
+import iit_cs586.OutputApi.ejectCard.EjectCard;
+import iit_cs586.OutputApi.gasPumpedMsg.GasPumpedMsg;
+import iit_cs586.OutputApi.payMsg.PayMsg;
+import iit_cs586.OutputApi.printReceipt.PrintReceipt;
+import iit_cs586.OutputApi.pumpGasUnit.PumpGasUnit;
+import iit_cs586.OutputApi.rejectMsg.RejectMsg;
+import iit_cs586.OutputApi.returnCash.ReturnCash;
+import iit_cs586.OutputApi.setInitialValue.SetInitialValue;
+import iit_cs586.OutputApi.setPayType.SetPayType;
+import iit_cs586.OutputApi.setPrice.SetPrice;
+import iit_cs586.OutputApi.storeCash.StoreCash;
+import iit_cs586.OutputApi.storeData.StorePrices;
+
+public interface PumpFactory {
+
+    StorePrices doStorePrices();
+
+    PayMsg doPayMsg();
+
+    StoreCash doStoreCash();
+
+    DisplayMenu doDisplayMenu();
+
+    RejectMsg doRejectMsg();
+
+    SetPrice doSetPrice();
+
+    SetInitialValue doSetInitialValue();
+
+    PumpGasUnit doPumpGasUnit();
+
+    GasPumpedMsg doGasPumpedMsg();
+
+    PrintReceipt doPrintReceipt();
+
+    CancelMsg doCancelMsg();
+
+    ReturnCash doReturnCash();
+
+    SetPayType doSetPayType();
+
+    EjectCard doEjectCard();
+
+}
