@@ -1,0 +1,11 @@
+package iit_cs586.OutputApi.setPayType;
+
+public class SetPayType2 implements SetPayType {
+
+	@Override
+	public void showSetPayTypeFlag(int t) {
+		System.out.println("No other pay type you can choose, just cash !!!");
+		System.out.println();
+	}
+
+}
