@@ -1,0 +1,67 @@
+package iit_cs586.gaspump;
+
+import iit_cs586.GasStation;
+import iit_cs586.MDA_EFSM;
+import iit_cs586.data.DS1;
+
+public class GasPump1 {
+
+    public static MDA_EFSM m = new MDA_EFSM();
+
+    public static DS1 ds1 = new DS1();
+
+    public void Activate(int a) {
+        if (a > 0) {
+            ds1.temp_a = a;
+            ds1.w = 1;
+            m.Activate();
+        }
+    }
+
+    public void Start() {
+        m.Start();
+    }
+
+    public void PayCash(int c) {
+        if (c > 0) {
+            ds1.temp_c = c;
+            m.PayType(0);
+        }
+    }
+
+    public void PayCredit() {
+        m.PayType(1);
+    }
+
+    public void Reject() {
+        m.Reject();
+    }
+
+    public void Cancel() {
+        m.Cancel();
+    }
+
+    public void Approved() {
+        m.Approved();
+    }
+
+    public void StartPump() {
+        m.Continue();
+        m.StartPump();
+    }
+
+    public void Pump() {
+        if (GasStation.ds1.w == 1) {
+            m.Pump();
+        } else if (GasStation.ds1.cash < GasStation.ds1.price * (GasStation.ds1.L + 1)) {
+            m.StopPump();
+            m.Receipt();
+        }
+    }
+
+    public void StopPump() {
+        m.StopPump();
+        m.Receipt();
+    }
+
+}
