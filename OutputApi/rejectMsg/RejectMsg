@@ -1,0 +1,5 @@
+package iit_cs586.OutputApi.rejectMsg;
+
+public interface RejectMsg {
+    void showRejectMsg();
+}
