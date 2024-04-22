@@ -1,0 +1,26 @@
+package iit_cs586.OutputApi.setPrice;
+
+import iit_cs586.GasStation;
+
+public class SetPrice2 implements SetPrice {
+
+    @Override
+    public void showSetPrice(int g) {
+        if (g == 1) {
+            GasStation.ds2.price = GasStation.ds2.Rprice;
+            System.out.println("Regular gas price are setted !!!");
+            System.out.println();
+        }
+        if (g == 2) {
+            GasStation.ds2.price = GasStation.ds2.Dprice;
+            System.out.println("Diesel gas price are setted !!!");
+            System.out.println();
+        }
+        if (g == 3) {
+            GasStation.ds2.price = GasStation.ds2.Pprice;
+            System.out.println("Premium gas price are setted !!!");
+            System.out.println();
+        }
+    }
+
+}
