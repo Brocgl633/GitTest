@@ -1,0 +1,5 @@
+package iit_cs586.OutputApi.cancelMsg;
+
+public interface CancelMsg {
+    void showCancelMsg();
+}
