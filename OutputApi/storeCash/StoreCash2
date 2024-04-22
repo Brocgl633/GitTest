@@ -1,0 +1,15 @@
+package iit_cs586.OutputApi.storeCash;
+
+import iit_cs586.GasStation;
+import iit_cs586.gaspump.GasPump2;
+
+public class StoreCash2 implements StoreCash {
+
+    @Override
+    public void showStoreCash() {
+        GasStation.ds2.cash = GasPump2.ds2.temp_cash;
+        System.out.println("Your cash saved !!!");
+        System.out.println();
+    }
+
+}
