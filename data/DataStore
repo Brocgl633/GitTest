@@ -1,0 +1,4 @@
+package iit_cs586.data;
+
+public abstract class DataStore {
+}
