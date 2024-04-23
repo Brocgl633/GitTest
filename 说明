@@ -1,0 +1,8 @@
+PumpGasUnit2 GasPump2 要改成 GasStation
+ReturnCash2 GasPump2 要改成 GasStation
+StorePrices2 GasPump2 要改成 GasStation
+SetInitialValue1 GasPump1 要改成 GasStation
+SetInitialValue2 GasPump2 要改成 GasStation
+DisplayMenu1 GasPump1 要改成 GasStation
+
+output包名改成strategy
