@@ -1,5 +1,0 @@
-package iit_cs586.OutputApi.ejectCard;
-
-public interface EjectCard {
-    void showEjectCard();
-}

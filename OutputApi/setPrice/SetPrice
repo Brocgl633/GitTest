@@ -1,5 +1,0 @@
-package iit_cs586.OutputApi.setPrice;
-
-public interface SetPrice {
-    void showSetPrice(int g);
-}

@@ -1,5 +1,0 @@
-package iit_cs586.OutputApi.setPayType;
-
-public interface SetPayType {
-    void showSetPayTypeFlag(int w);
-}

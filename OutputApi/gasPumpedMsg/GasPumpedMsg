@@ -1,5 +1,0 @@
-package iit_cs586.OutputApi.gasPumpedMsg;
-
-public interface GasPumpedMsg {
-    void showGasPumpedMsg();
-}

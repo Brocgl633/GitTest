@@ -1,5 +1,0 @@
-package iit_cs586.OutputApi.payMsg;
-
-public interface PayMsg {
-    void showPayMsg();
-}
