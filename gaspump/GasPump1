@@ -8,12 +8,9 @@ public class GasPump1 {
 
     public static MDA_EFSM m = new MDA_EFSM();
 
-    public static DS1 ds1 = new DS1();
-
     public void Activate(int a) {
         if (a > 0) {
-            ds1.temp_a = a;
-            ds1.w = 1;
+            GasStation.gp1_temp_a = a;
             m.Activate();
         }
     }
@@ -24,7 +21,7 @@ public class GasPump1 {
 
     public void PayCash(int c) {
         if (c > 0) {
-            ds1.temp_c = c;
+            GasStation.gp1_temp_c = c;
             m.PayType(0);
         }
     }
@@ -56,6 +53,8 @@ public class GasPump1 {
         } else if (GasStation.ds1.cash < GasStation.ds1.price * (GasStation.ds1.L + 1)) {
             m.StopPump();
             m.Receipt();
+        } else {
+            m.Pump();
         }
     }
 
