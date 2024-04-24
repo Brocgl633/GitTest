@@ -1,8 +1,8 @@
 package iit_cs586;
 
-import iit_cs586.AbstractFactory.PumpFactory;
-import iit_cs586.AbstractFactory.PumpFactory1;
-import iit_cs586.AbstractFactory.PumpFactory2;
+import iit_cs586.abstractFactory.PumpAbstractFactory;
+import iit_cs586.abstractFactory.PumpFactory1;
+import iit_cs586.abstractFactory.PumpFactory2;
 import iit_cs586.data.DS1;
 import iit_cs586.data.DS2;
 import iit_cs586.gaspump.GasPump1;
@@ -12,11 +12,23 @@ import java.util.Scanner;
 
 public class GasStation {
 
-    public static PumpFactory pf;
+    public static PumpAbstractFactory paf;
 
     public static DS1 ds1;
 
+    public static int gp1_temp_a;
+
+    public static int gp1_temp_c;
+
     public static DS2 ds2;
+
+    public static float gp2_temp_a;
+
+    public static float gp2_temp_b;
+
+    public static float gp2_temp_c;
+
+    public static int gp2_temp_cash;
 
     public static void main(String[] args) {
 
@@ -24,8 +36,8 @@ public class GasStation {
         while (true) {
 
             System.out.println("****** Welcome to Gas Station ******");
-            System.out.println("1. Press 1 for GasPump1.");
-            System.out.println("2. Press 2 for GasPump2.");
+            System.out.println("1. Press 1 for GasPump1.java.");
+            System.out.println("2. Press 2 for GasPump2.java.");
             System.out.println("3. Press 3 to exit the program.");
             System.out.println();
             System.out.println("Please enter your choice : ");
@@ -35,7 +47,8 @@ public class GasStation {
 
             if (gasPump == 1) {
                 GasPump1 gp1 = new GasPump1();
-                pf = new PumpFactory1();
+                ds1 = new DS1();
+                paf = new PumpFactory1();
 
                 System.out.println("GasPump-1");
                 System.out.println("MENU of Operations");
@@ -119,7 +132,8 @@ public class GasStation {
                 }
             } else if (gasPump == 2) {
                 GasPump2 gp2 = new GasPump2();
-                pf = new PumpFactory2();
+                ds2 = new DS2();
+                paf = new PumpFactory2();
 
                 System.out.println("GasPump-2");
                 System.out.println("MENU of Operations");
