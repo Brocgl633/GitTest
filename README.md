@@ -1,118 +1,51 @@
-Class Request
-string op_signature
+根据提供的文档内容，我们需要为每个任务分配资源。在文档中，已经列出了可用的资源，包括项目经理、需求工程师、系统工程师、程序员/软件工程师、测试工程师和文档工程师。每个任务所需的资源可以根据软件工程的假设来确定。以下是一些可能的资源分配，以及相应的假设：
 
+1. **项目计划** (Project Plan)
+   - **写计划** (Write Plan): 任务可能需要项目经理和需求工程师共同完成。
+   - **审查计划** (Review Plan): 需要至少一名来自每个技术领域的工程师进行审查，可能涉及系统工程师、程序员/软件工程师和测试工程师。
 
+2. **需求** (Requirements)
+   - **写需求** (Write requirements): 需求工程师负责编写需求。
+   - **审查需求/用例模型** (Review Requirements/ Use Case Model): 需要需求工程师准备审查，并且可能需要其他工程师参与会议。
 
-Class Request1
-string p1
-int p2
-int p3
+3. **分析** (Analysis)
+   - **写分析文档** (Write Analysis Document): 系统工程师负责创建分析和设计文档。
+   - **审查分析文档** (Review Analysis Document): 同样需要不同工程师参与准备和会议。
 
+4. **设计** (Design)
+   - **写详细设计** (Write DD): 系统工程师负责。
+   - **审查详细设计** (Review DD): 需要不同工程师参与准备和会议。
 
+5. **编码和单元测试** (Coding and unit test)
+   - **写代码** (Write Code): 程序员/软件工程师负责。
+   - **单元测试** (Unit Testing): 程序员/软件工程师准备和执行测试案例。
 
-Class Request2
-string p1
-int p2
+6. **系统集成测试** (System Integration Testing)
+   - **写测试计划** (Write test plan): 测试工程师负责。
+   - **执行测试计划** (Execute TP): 测试工程师执行测试案例。
 
+7. **负载、压力和性能测试** (Load, Stress, and Performance Testing)
+   - 同系统集成测试类似，由测试工程师负责。
 
+8. **文档** (Documentation)
+   - **用户文档** (User Documentation): 文档工程师负责编写用户文档。
 
-Class Request3
-string p1
-int result
+9. **培训材料** (Training Material)
+   - **教程** (Tutorial): 文档工程师负责编写教程材料。
 
+**假设**:
+- 每个任务的“审查”或“检验”会议由5名工程师组成，包括至少一名原作者。
+- 每个任务的“审查”或“检验”准备由4名工程师组成，不包括原作者。
+- 任何“返工”任务可以由原始任务的一个或所有作者执行。
+- 项目计划应至少由每个技术领域的一名工程师审查。
+- 系统工程师负责创建分析和设计工件。
 
+**资源分配示例**:
+- 项目经理 (PM): 负责监督整个项目，可能参与项目计划和审查。
+- 需求工程师 (RE): 主要负责编写和审查需求。
+- 系统工程师 (SE): 负责分析和设计阶段的文档编写和审查。
+- 程序员/软件工程师 (PE): 负责编码和单元测试。
+- 测试工程师 (TE): 负责系统集成测试、负载测试、压力测试和性能测试。
+- 文档工程师 (DE): 负责用户文档和培训材料的编写。
 
-Class Request4
-string p1
-float result
-
-
-
-Class ClientProxy_A
-Operations
-void Service1(string x, int y, int z) {
-	r = new Request1
-	r->p1 = x
-	r->p2 = y
-	r->p3 = z
-	r->op_signature = "void Service1(string, int, int)"
-	brk->ForwardService(r)
-}
-
-void Service2(string x, int y) {
-	r = new Request2
-	r->p1 = x
-	r->p2 = y
-	r->op_signature = "void Service2(string, int)"
-	brk->ForwardService(r)
-}
-
-int Service3(string x) {
-	r = new Request3
-	r->p1 = x
-	r->op_signature = "int Service3(string)"
-	brk->ForwardService(r)
-	return r->result
-}
-
-float Service4(string x) {
-	r = new Request4
-	r->p1 = x
-	r->op_signature = "float Service4(string)"
-	brk->ForwardService(r)\
-	return r->result
-}
-
-
-
-Class Broker
-ServerProxy *sp
-ServerProxy spList[][]
-Operations
-Register(ServerProxy sp, string signature) {
-	add sp to spList
-	add signature to spList[sp]
-}
-
-Unregister(ServerProxy sp) {
-	remove sp from spList
-}
-
-FindServerProxy(string op_signature) {
-	For every svrproxy in spList
-		If spList[svrproxy] contains op_signature Then
-			return svrproxy
-		End If
-	End For
-}
-
-ForwardService(Request r) {
-	sp = FindServerProxy(r->op_signature)
-	If sp != NULL Then
-		sp->callService(r)
-	End If
-}
-
-
-
-Class ServerProxy_S1
-server-S1 *svr
-Operations
-callService(Request r) {
-	switch(r->op_signature)
-		case "void Service1(string, int, int)"
-			svr->Service1(r->p1, r->p2, r->p3)
-		case "void Service2(string, int)"
-			svr->Service2(r->p1, r->p2)
-		case "int Service3(string)"
-			r->result = svr->Service3(r->p1)
-		case "float Service4(string)"
-			r->result = svr->Service4(r->p1)
-}
-
-Class ServerProxy
-Broker *brk
-Operations
-callService(Request r) is an abstract operation
-
-
+请注意，这些分配是基于文档中的指示和一般的软件工程实践。具体的资源分配可能需要根据项目的实际情况和团队的具体能力进行调整。
