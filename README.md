@@ -1,51 +1,96 @@
-根据提供的文档内容，我们需要为每个任务分配资源。在文档中，已经列出了可用的资源，包括项目经理、需求工程师、系统工程师、程序员/软件工程师、测试工程师和文档工程师。每个任务所需的资源可以根据软件工程的假设来确定。以下是一些可能的资源分配，以及相应的假设：
+To assign resources to the tasks in the Work Breakdown Structure (WBS) given the available resources and making appropriate assumptions, we will follow the task categories and their dependencies while adhering to the rules outlined. Below are the assignments based on the roles required for each phase and activity:
 
-1. **项目计划** (Project Plan)
-   - **写计划** (Write Plan): 任务可能需要项目经理和需求工程师共同完成。
-   - **审查计划** (Review Plan): 需要至少一名来自每个技术领域的工程师进行审查，可能涉及系统工程师、程序员/软件工程师和测试工程师。
+| Category  | Initials  |
+| ------------ | ------------ |
+|  PM |  PM3, PM4, PM5, PM6 |
+|  RE |  RE7, RE8, RE102, RE103, RE117, RE118, RE119, , RE120 |
+|  SE |  SE7, SE8, SE9, SE204, SE205, SE501, SE503, SE504 |
+|  PE |  PE7, PE8, PE9, PE10, PE202, PE203, PE205, PE206 |
+|  TE |  TE302, TE2403, TE404, TE405, TE509, TE510 |
+|  DE |  DE105, DE203, DE204, DE205, DE206 |
 
-2. **需求** (Requirements)
-   - **写需求** (Write requirements): 需求工程师负责编写需求。
-   - **审查需求/用例模型** (Review Requirements/ Use Case Model): 需要需求工程师准备审查，并且可能需要其他工程师参与会议。
+### Project Plan
+1. **Write Plan**: PM3, PM4
+2. **Review Plan**:
+   - **Preparation for Review**: SE7, PE7, TE302, DE105
+   - **Review Meeting**: PM3, SE7, PE7, TE302, DE105
+3. **Rework**: PM3, PM4
 
-3. **分析** (Analysis)
-   - **写分析文档** (Write Analysis Document): 系统工程师负责创建分析和设计文档。
-   - **审查分析文档** (Review Analysis Document): 同样需要不同工程师参与准备和会议。
+### Requirements
+1. **Write Requirements**: RE7, RE8, RE102
+2. **Write Use Case Model**: RE103, RE117
+3. **Review Requirements/Use Case Model**:
+   - **Preparation for Review**: RE118, RE119, RE120, SE8
+   - **Review Meeting**: RE7, RE8, RE103, SE7, PE7
+4. **Rework**: RE7
 
-4. **设计** (Design)
-   - **写详细设计** (Write DD): 系统工程师负责。
-   - **审查详细设计** (Review DD): 需要不同工程师参与准备和会议。
+### Analysis
+1. **Write Analysis Document**: SE7, SE8
+2. **Review Analysis Document**:
+   - **Preparation for Analysis Document**: SE9, SE204, RE8, PE8
+   - **Review Meeting**: SE7, SE8, SE9, PE7, TE302
+3. **Rework**: SE8
 
-5. **编码和单元测试** (Coding and unit test)
-   - **写代码** (Write Code): 程序员/软件工程师负责。
-   - **单元测试** (Unit Testing): 程序员/软件工程师准备和执行测试案例。
+### Design
+1. **Write Detailed Design (DD)**: SE8, SE204, SE205
+2. **Review DD**:
+   - **Preparation for DD**: SE501, SE503, PE9, TE302
+   - **Review Meeting**: SE8, SE9, PE7, PE8, TE302
+3. **Rework**: SE8
+4. **Write Data Model (DM)**: SE503
+5. **Review DM**:
+   - **Preparation for DM**: SE504, PE10, PE202, TE2403
+   - **Review Meeting**: SE503, PE10, PE202, TE2403, TE404
+6. **Rework**: SE503
 
-6. **系统集成测试** (System Integration Testing)
-   - **写测试计划** (Write test plan): 测试工程师负责。
-   - **执行测试计划** (Execute TP): 测试工程师执行测试案例。
+### Coding and Unit Test
+1. **Write Code**: PE7, PE8, PE9, PE10
+2. **Unit Testing**:
+   - **Prepare/Execute Test Cases**: TE302, TE2403
+   - **Fix Found Defects**: PE7, PE8
+   - **Test Fixed Defects**: TE302, TE2403
+3. **Code Inspection**:
+   - **Preparation for Code Inspection**: PE202, PE203, TE302, TE2403
+   - **Code Inspection Meeting**: PE7, PE202, PE203, TE302, TE404
+   - **Rework**: PE8
 
-7. **负载、压力和性能测试** (Load, Stress, and Performance Testing)
-   - 同系统集成测试类似，由测试工程师负责。
+### System Integration Testing
+1. **Write Test Plan (TP)**: TE404, TE405, TE509
+2. **Review TP**:
+   - **Preparation for TP**: TE2403, TE510, PE9, PE203
+   - **Review TP Meeting**: TE404, TE2403, TE510, PE9, PE203
+   - **Rework**: TE509
+3. **Execute TP (test cases)**: TE509, TE510
+4. **Fix Found Defects**: PE202, PE203
+5. **Test Fixed Defects**: TE509, TE510
 
-8. **文档** (Documentation)
-   - **用户文档** (User Documentation): 文档工程师负责编写用户文档。
+### Load, Stress, and Performance Testing
+1. **Write Test Plan (TP)**: TE405, TE509, TE510
+2. **Review TP**:
+   - **Preparation for TP**: TE404, TE2403, PE205, PE206
+   - **Review TP Meeting**: TE404, TE405, TE2403, PE205, PE206
+   - **Rework**: TE510
+3. **Execute TP (test cases)**: TE509, TE510
+4. **Fix Found Defects**: PE202, PE203
+5. **Test Fixed Defects**: TE509, TE510
 
-9. **培训材料** (Training Material)
-   - **教程** (Tutorial): 文档工程师负责编写教程材料。
+### Documentation
+1. **User Documentation**: DE105, DE203, DE204
+2. **Review UD**:
+   - **Preparation for UD Review**: DE205, DE206, SE501, PE8
+   - **Review UD Meeting**: DE105, DE205, DE206, SE501, PE8
+   - **Rework**: DE105
 
-**假设**:
-- 每个任务的“审查”或“检验”会议由5名工程师组成，包括至少一名原作者。
-- 每个任务的“审查”或“检验”准备由4名工程师组成，不包括原作者。
-- 任何“返工”任务可以由原始任务的一个或所有作者执行。
-- 项目计划应至少由每个技术领域的一名工程师审查。
-- 系统工程师负责创建分析和设计工件。
+### Training Material
+1. **Tutorial**: DE203, DE204
+2. **Review Tutorial**:
+   - **Preparation for Tutorial Review**: DE205, DE206, SE503, PE202
+   - **Review Tutorial Meeting**: DE203, DE205, SE8, SE503, PE202
+   - **Rework**: DE203, DE204
 
-**资源分配示例**:
-- 项目经理 (PM): 负责监督整个项目，可能参与项目计划和审查。
-- 需求工程师 (RE): 主要负责编写和审查需求。
-- 系统工程师 (SE): 负责分析和设计阶段的文档编写和审查。
-- 程序员/软件工程师 (PE): 负责编码和单元测试。
-- 测试工程师 (TE): 负责系统集成测试、负载测试、压力测试和性能测试。
-- 文档工程师 (DE): 负责用户文档和培训材料的编写。
+### Assumptions
+- Each task requiring review or inspection involves five engineers including one author (for meetings) and four excluding the author (for preparations).
+- Rework tasks are performed by the authors.
+- Resource allocation considers available productivity rates and ensures each phase starts as soon as its dependencies are satisfied.
 
-请注意，这些分配是基于文档中的指示和一般的软件工程实践。具体的资源分配可能需要根据项目的实际情况和团队的具体能力进行调整。
+This assignment ensures that resources are allocated efficiently while meeting the project requirements and constraints specified in the document.
