@@ -69,3 +69,32 @@
 4. **Customer** 通过关联线连接到 **Update Record**、**Pay Monthly Bill**、**Rent Online Game**、**Order PPV Event**、**Cancel PPV Event**、**Change/Cancel/Add TV or Internet Plan**、**Rate/Review Service or Event**、**Share Service Link** 和 **Schedule Service Appointment**。
 
 通过这个描述，可以更清晰地理解 WideCast 系统中的参与者和用例之间的交互。希望这些信息对你有帮助！
+
+1. Update Record
+2. Change/Cancel/Add TV or Internet Plan
+3. Pay Monthly Bill
+4. Order PPV Event
+5. Rent Online Game
+6. Cancel PPV Event
+7. Check Order Date
+8. Rate/Review Service or Event
+9. Share Service Link
+10. Schedule Service Appointment
+11. Reschedule Service Appointment
+12. Cancel Service Appointment
+13. Update Order
+14. Delete Order
+15. Cancel Order
+16. Place PPV Order
+17. If Custormer Agree
+18. Forecast Sales Revenue
+19. Perform Demand Analysis
+20. Identify Super Connectors
+21. Create Customer Account
+22. Check If Customer Account Exist
+23. Update Customer Account
+24. Create Incident Ticket
+25. Assign Incident Ticket
+26. Schedule incident ticket
+27. Close incident ticket
+28. Cancel incident ticket
