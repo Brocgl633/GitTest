@@ -1,30 +1,25 @@
 ### CS587 - Midterm Exam Answers
 
-**Q1. What is the purpose of the work package? Who will create it?**
+**✔ Q1. What is the purpose of the work package? Who will create it?**
 
-A work package is a detailed deliverable or project work component at the lowest level of the Work Breakdown Structure (WBS). It serves multiple purposes:
-- **Breaks down tasks:** It divides the overall project into manageable sections.
-- **Defines scope:** It provides a clear description of what is to be done.
-- **Facilitates scheduling and budgeting:** Each work package has its own timeline and budget, helping in the overall project planning.
-- **Assigns responsibilities:** It identifies who will perform the work, often specifying the project team members or departments responsible.
+The work package is a statement by each activity manager as to how he or she plans to complete the activity within the scheduled start and finish dates. It serves multiple purposes:
+- It describes in detail the tasks, start/end dates, that need to be done in order to complete the work for an activity..
+- The work package manager, or activity manager, may choose to include the start and end dates for each task in the package but that may allow others to micromanage your work items.
+- The work package also can be adapted to status reporting. Some organizations use the percent of tasks completed as the percent of activity completion.
 
-Typically, work packages are created by the project manager in collaboration with team leads and subject matter experts to ensure accurate and feasible task breakdowns.
+Typically, work packages are created by the work package manager or activity manager.
 
-**Q2. Explain the difference between reviews and audits within the context of software project management and the software development process.**
+**✔ Q2. Explain the difference between reviews and audits within the context of software project management and the software development process.**
 
-- **Reviews:** These are evaluations of project activities or deliverables conducted internally within the project team. Reviews aim to identify defects, verify conformance to requirements, and ensure that the project is on track. Types include peer reviews, design reviews, code reviews, and formal inspections.
+- **Reviews:** These are evaluations of project activities or deliverables conducted internally within the project team. Reviews aim to identify defects, verify conformance to requirements, and ensure that the project is on track. It can be done at any stage of the development process. Types include peer reviews, status reviews and quality gates reviews.
 
-- **Audits:** These are formal examinations conducted by external parties (e.g., quality assurance teams or external auditors) to ensure compliance with standards, policies, and procedures. Audits assess the effectiveness of the processes and their implementation within the project.
+- **Audits:** It is a comprehensive, systematic, and independent examination of a software product to determine compliance with specified standards or requirements. Audits are usually conducted at the final stage of the software development process to ensure that the software product complies with specifications and standards. The purpose of an audit is to ensure the quality and integrity of a software product and to determine compliance with specified standards or requirements.
 
-**Q3. When building the project network diagram, can we schedule the testing phase to start after the design phase? Explain.**
+**✔ Q3. When building the project network diagram, can we schedule the testing phase to start after the design phase? Explain.**
 
-Yes, we can schedule the testing phase to start after the design phase. The project network diagram typically follows the sequence of project phases:
-- **Design Phase:** This includes high-level design (HLD) and low-level design (LLD) where the architecture and detailed system components are defined.
-- **Testing Phase:** Testing ensures that the developed system meets the specified requirements and is free of defects.
+Yes, we can schedule the testing phase to start after the design phase when building the project network diagram. In fact, this is a common approach in project management. In the case of software project management, the testing phase typically comes after the design phase. This is because the design phase is where the software requirements are translated into a detailed design, and the testing phase is where the design is validated against the requirements. Therefore, it makes sense to schedule the testing phase after the design phase in the project network diagram.
 
-However, it's crucial to allow for overlaps or iterations between phases to accommodate design changes identified during testing. This approach is often seen in iterative and agile methodologies.
-
-**Q4. For a software development organization that is CMM level-3, which method can be used for estimating activity effort/duration? Explain.**
+**✔ Q4. For a software development organization that is CMM level-3, which method can be used for estimating activity effort/duration? Explain.**
 
 At CMM level-3 (Defined), organizations use standardized processes and methodologies across projects. Estimation methods include:
 - **Function Point Analysis (FPA):** Measures the functionality delivered to the user, allowing effort estimation based on the complexity and size of the project.
@@ -34,7 +29,7 @@ These methods are chosen for their ability to provide accurate estimates based o
 
 **Q5. Who controls the design review meeting? What are the different metrics collected in the requirements review meeting?**
 
-- **Control of Design Review Meeting:** The design review meeting is typically controlled by the project manager or a designated review leader. This person ensures that the meeting follows the agenda, stays on track, and that all necessary topics are covered.
+- **Control of Design Review Meeting:** The design review meeting is typically controlled by the project manager, design engineers or designated review leaders. This person ensures that the meeting follows the agenda, stays on track, and that all necessary topics are covered.
 
 - **Metrics Collected in Requirements Review Meeting:**
   - Number of requirements reviewed
@@ -74,12 +69,13 @@ Constraints include:
    - Complete the rework promptly.
    - Consider the process effective and continue with current practices, while still seeking minor improvements.
 
-**Q9. Milestone trend chart:**
+**✔ Q9. Milestone trend chart:**
 
 (http://image.huawei.com/tiny-lts/v1/images/076768890077fbdce038645de137feca_860x760.png)
 From the milestone trend chart, we can see that seven successive data points above the planned milestone data, indicating a trend of early completions.
 
-**Q10. Effort and duration calculation for tasks:**
+**✔ Q10. Effort and duration calculation for tasks:**
+
 | Tasks  | Amount of Work  | Productivity  | Effort  | Duration  | Resources  |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
 | **1 High Level Design (HLD)**  |   |   |   |   |   |
