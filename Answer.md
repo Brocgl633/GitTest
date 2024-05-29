@@ -76,26 +76,27 @@ Constraints include:
 
 **Q9. Milestone trend chart:**
 
-The milestone trend chart for the provided milestones will show a series of points where each milestone is plotted on a timeline. Each milestone is delivered earlier than planned, indicating a trend of early completions.
+(http://image.huawei.com/tiny-lts/v1/images/076768890077fbdce038645de137feca_860x760.png)
+From the milestone trend chart, we can see that seven successive data points above the planned milestone data, indicating a trend of early completions.
 
 **Q10. Effort and duration calculation for tasks:**
-
-- **High Level Design (HLD):**
-  - Write HLD Document: \( 176 \text{ pages} / 2 \text{ pages/hour} = 88 \text{ hours} \)
-  - Preparation for HLD Document Review: \( 176 \text{ pages} / 4 \text{ pages/hour} = 44 \text{ hours} \times 4 \text{ engineers} = 176 \text{ hours} \)
-  - Review Meeting: \( 176 \text{ pages} / 6 \text{ pages/hour} = 29.33 \text{ hours} \times 5 \text{ engineers} = 146.65 \text{ hours} \)
-  - Rework: \( 43 \text{ defects} / 5 \text{ defects/hour} = 8.6 \text{ hours} \)
-
-- **Low Level Design (LLD):**
-  - Write LLD Document: \( 76 \text{ pages} / 2 \text{ pages/hour} = 38 \text{ hours} \)
-  - Preparation for LLD Document Review: \( 76 \text{ pages} / 3 \text{ pages/hour} = 25.33 \text{ hours} \times 4 \text{ engineers} = 101.32 \text{ hours} \)
-  - Review Meeting: \( 76 \text{ pages} / 6 \text{ pages/hour} = 12.67 \text{ hours} \times 5 \text{ engineers} = 63.35 \text{ hours} \)
-  - Rework: \( 43 \text{ defects} / 1 \text{ defect/hour} = 43 \text{ hours} \)
-
-- **Testing:**
-  - Write Test Plan: \( 102 \text{ pages} / 5 \text{ pages/hour} = 20.4 \text{ hours} \)
-  - Preparation for Test Plan Review: \( 102 \text{ pages} / 10 \text{ pages/hour} = 10.2 \text{ hours} \times 4 \text{ engineers} = 40.8 \text{ hours} \)
-  - Review Meeting: \( 102 \text{ pages} / 15 \text{ pages/hour} = 6.8 \text{ hours} \times 5 \text{ engineers} = 34 \text{ hours} \)
-  - Rework: \( 75 \text{ defects} / 5 \text{ defects/hour} = 15 \text{ hours} \)
-
-By following these steps and using these calculations, the effort and duration for each task can be determined accurately.
+| Tasks  | Amount of Work  | Productivity  | Effort  | Duration  | Resources  |
+| ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
+| **1 High Level Design (HLD)**  |   |   |   |   |   |
+| 1.1 Write HLD Document  | 176 pages  | 2 page/Hour  | 88  | 29.33  | 3  |
+| 1.2 Review HLD Document  |   |   |   |   |   |
+| 1.2.1 Preparation for HLD Document  |   | 4 pages/Hour  | 44  | 11  | 4  |
+| 1.2.2 Review Meeting |   | 6 pages/Hour  | 29.33  | 5.87  | 5  |
+| 1.3 Rework | 43 defects  | 5 defect/Hour  | 8.6  | 2.87  | 3  |
+| **2 Low Level Design (LLD)**  |   |   |   |   |   |
+| 2.1 Write LLD Document | 76 pages  | 2 pages/Hour  | 38  | 19  | 2  |
+| 2.2 Review LLD Document |   |   |   |   |   |
+| 2.2.1 Preparation for LLD Document |   | 3 pages/Hour  | 25.33  | 6.33  | 4  |
+| 2.2.2 Review Meeting |   | 6 pages/Hour  | 16.67  | 3.33  | 5  |
+| 2.3 Rework | 43 defects  | 1 defect/Hour  | 43  | 21.5  | 2  |
+| **3 Testing**  |   |   |   |   |   |
+| 3.1 Write Test Plan | 102 pages  | 5 pages/Hour  | 20.4  | 10.2  | 2  |
+| 3.2 Review Test Plan |   |   |   |   |   |
+| 3.2.1 Preparation for Test Plan  |   | 10 pages/Hour  | 10.2  | 2.55  | 4  |
+| 3.2.2 Review Meeting  |   | 15 pages/Hour  | 6.8  | 1.36  | 5  |
+| 3.3 Rework | 75 defects  | 5 defects/Hour  | 15  | 7.5  | 2  |
