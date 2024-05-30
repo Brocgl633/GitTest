@@ -57,6 +57,7 @@ Customer
 + List<Order> orderList
 + List<Subscription> subscriptionList
 
++ enrollInPlan(): void
 + updateRecord(record) : void
 + payMonthlyBill(order) : void
 + changeCommutingPlan(plan) : void
