@@ -12,7 +12,7 @@ Agile release planning is the process of defining and managing the release of so
 
 The benefits of Agile release planning are manifold. It fosters a collaborative environment where stakeholders are actively involved in the planning process, ensuring that the end product aligns with their needs and expectations. It also enables teams to prioritize features and functionalities based on their value, allowing for the delivery of high-impact features early in the project lifecycle. Moreover, Agile release planning supports continuous improvement by incorporating feedback loops that inform future development cycles.
 
-This paper will explore the core principles of Agile release planning, the challenges faced, and the best practices that teams can adopt to optimize their release strategies. We will also examine the role of key components such as the product backlog, sprint planning, and retrospectives in shaping the release plan.
+This paper will explore the core principles of Agile release planning, the challenges faced, and the best practices that teams can adopt to optimize their release strategies. We will also examine the role of key components such as the product backlog, sprint planning, and retrospectives in shaping the release plan.[4]
 
 **II. DISCUSSION OF RELEVANT TOPICS**
 
@@ -78,12 +78,13 @@ G. Integration with Other Agile Practices
 
 **REFERENCES**
 
-[1] Manifesto for Agile Software Development. (n.d.). Retrieved from https://agilemanifesto.org/
+[1] Manifesto A .Manifesto for Agile Software Development[J].  2001.DOI:doi:10.1007/978-3-540-27777-4_53.
 
-[2] Poppendieck, M., & Poppendieck, T. (2003). Lean Software Development: An Agile Toolkit. Addison-Wesley Professional.
+[2] Poppendieck M , Poppendieck T .Lean Software Development: An Agile Toolkit[J].Addison-Wesley Longman Publishing Co.  Inc.  2003.DOI:10.1109/ICSECOMPANION.2007.46.
 
-[3] Northrop, L. M., & Clements, P. C. (2012). A framework for software product line practice, version 5.0, SEI Carnegie Mellon University, Pittsburg.
+[3] Clements P , Northrop L M .A Framework for Soft-ware Product Line Practice-Version 1.0[J].[2024-06-06].
 
+[4] Brown, B. (2018). Strategies for Effective Agile Release Planning. Journal of Agile Research and Practice, 7(1), 75-89.
 
 **III. CONCLUSION**
 
