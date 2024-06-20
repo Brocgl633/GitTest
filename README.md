@@ -1,2 +1,0 @@
-迭代器模式：
-OrderIterator可以看作抽象迭代器，其继承Java自带的Iterator接口。Manager可以看作具体迭代器，按照实际需求重写hasNext()和next()两个方法。OrderAggregate可以看作抽象聚合器，其中有一个获取抽象迭代器的方法getIterator()。SalesTeam可以看作具体聚合器，实现OrderAggregate的getIterator()方法，获取具体迭代器Manager。所以通过迭代器模式，Manager根据实际情况，在迭代过程中添加自己的处理过程，如查看订单的价格、查看订单的创建时间等等。针对SalesTeam而言，他们的任务是分析用户的订单，从而获取更多信息。所以SalesTeam则可以通过Manager对象获取其维护的订单列表，同时获得Manager迭代器，在迭代的过程中不仅可以使用Manager实现的迭代逻辑，同时也可以添加自己的处理逻辑，如聚合某一用户的订单总量，同一天有多少订单数等等。通过额外添加的逻辑来更好地分析用户的购买行为，获取更多的数据。
